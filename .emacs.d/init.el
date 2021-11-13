@@ -1,9 +1,34 @@
-;; Package init
-(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                         ("melpa" . "https://melpa.org/packages/")
-                         ("org" . "http://orgmode.org/elpa/")))
+;;; Straight
+;;; https://github.com/raxod502/straight.el#getting-started
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+(straight-use-package 'use-package)
 
-(package-initialize)
+;;; Helm
+(straigth-use-package 'helm)
+(global-set-key (kbd "M-x") #'helm-M-x)
+(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+(global-set-key (kbd "C-x C-f") #'helm-find-files)
+(helm-mode 1)
+
+
+;; Package init
+;; (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+;;                          ("melpa" . "https://melpa.org/packages/")
+;;                          ("org" . "http://orgmode.org/elpa/")))
+
+;; (package-initialize)
+
 
 ;;; Line wrapping
 (global-visual-line-mode)
@@ -131,7 +156,7 @@
   (keyboard-translate ?\] ?\)))
 
 ;; Ido mode
-(ido-mode 10)
+;; (ido-mode 10)
 
 ;; Switch buffers
 (global-set-key (kbd "C-'") 'other-window)
