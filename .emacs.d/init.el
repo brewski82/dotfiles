@@ -21,18 +21,11 @@
 (global-set-key (kbd "C-x C-f") #'helm-find-files)
 (helm-mode 1)
 
-;;; Org
-(straight-use-package 'org)
-(straight-use-package 'org-bullets)
-(require 'org-bullets)
-(add-hook 'org-mode-hook 'org-bullets-mode)
-;; (require 'ox-extra)
-;; (ox-extras-activate '(ignore-headlines))
-;; (require 'ox-latex)
-;; (setq org-latex-inputenc-alist '(("utf8" . "utf8x")))
-;; (setf (nth 4 org-emphasis-regexp-components) 10)
-
 (require 'cl-lib)
+
+;;; Org
+(push "~/.emacs.d/william-bruschi" load-path)
+(require 'william-bruschi-org-setup nil nil)
 
 ;;; LSP Mode
 (straight-use-package 'lsp-mode)
