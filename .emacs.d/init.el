@@ -44,7 +44,9 @@
 (straight-use-package 'helm-lsp)
 (straight-use-package 'dap-mode)
 (straight-use-package 'json-mode)
+(straight-use-package 'which-key)
 (yas-global-mode 1)
+(which-key-mode)
 (add-hook 'python-mode-hook #'lsp)
 ;(add-hook 'sh-mode-hook #'lsp)
 (add-hook 'rjsx-mode-hook #'lsp)
@@ -54,6 +56,10 @@
       company-idle-delay 0.0
       company-minimum-prefix-length 1
       create-lockfiles nil) ;; lock files will kill `npm start'
+(global-set-key (kbd "C-;") 'completion-at-point)
+(define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
 
 ;;; Theme
 (straight-use-package 'soft-charcoal-theme)
