@@ -50,8 +50,8 @@
       company-minimum-prefix-length 1
       create-lockfiles nil) ;; lock files will kill `npm start'
 (global-set-key (kbd "C-;") 'completion-at-point)
-(define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
 (with-eval-after-load 'lsp-mode
+  (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
 
 ;;; Theme
