@@ -38,6 +38,9 @@
 (straight-use-package 'dap-mode)
 (straight-use-package 'json-mode)
 (straight-use-package 'which-key)
+(straight-use-package 'typescript-mode)
+(straight-use-package 'rjsx-mode)
+(straight-use-package 'ts-comint)
 (yas-global-mode 1)
 (which-key-mode)
 (add-hook 'python-mode-hook #'lsp)
@@ -241,10 +244,10 @@
 ;;; Javascript
 (with-eval-after-load 'js
   (define-key js-mode-map (kbd "M-.") nil))
-
 ;;; Default to rjsx mode
-(straight-use-package 'rjsx-mode)
 (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+;; (add-to-list 'auto-mode-alist '("\\.ts\\'" . rjsx-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode-hook))
 
 ;;; Function to send current statement or function to nodejs repl.
 ;; (defun wb-nodejs-repl-send-statement ()
