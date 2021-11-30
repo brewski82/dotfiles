@@ -46,7 +46,9 @@
 (add-hook 'python-mode-hook #'lsp)
 ;(add-hook 'sh-mode-hook #'lsp)
 (add-hook 'rjsx-mode-hook #'lsp)
+(add-hook 'rjsx-mode-hook #'electric-pair-local-mode)
 (add-hook 'typescript-mode-hook #'lsp)
+(add-hook 'typescript-mode-hook #'electric-pair-local-mode)
 (setq gc-cons-threshold (* 100 1024 1024)
       read-process-output-max (* 1024 1024)
       company-idle-delay 0.0
@@ -66,6 +68,7 @@
 (setq
   uniquify-buffer-name-style 'post-forward
   uniquify-separator ":")
+(set-default 'truncate-lines nil)
 
 ;;; Enable visual feedback on selections
 (setq transient-mark-mode t)
