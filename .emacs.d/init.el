@@ -49,6 +49,7 @@
 (add-hook 'rjsx-mode-hook #'electric-pair-local-mode)
 (add-hook 'typescript-mode-hook #'lsp)
 (add-hook 'typescript-mode-hook #'electric-pair-local-mode)
+
 (setq gc-cons-threshold (* 100 1024 1024)
       read-process-output-max (* 1024 1024)
       company-idle-delay 0.0
@@ -250,7 +251,7 @@
 ;;; Default to rjsx mode
 (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
 ;; (add-to-list 'auto-mode-alist '("\\.ts\\'" . rjsx-mode))
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode-hook))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
 
 ;;; Function to send current statement or function to nodejs repl.
 ;; (defun wb-nodejs-repl-send-statement ()
