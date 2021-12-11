@@ -15,7 +15,7 @@ export LSCOLORS=Exfxcxdxbxegedabagacad
 export GREP_OPTIONS='--color=auto'
 
 export TERM="xterm-color"
-export PS1='\[\e[1;32m\][\u@\h \W]\$\[\e[0m\] '
+export PS1='\[\e[32m\]\u@\h \W\[\e[0m\] $ '
 
 # Ruby
 export GEM_HOME=$HOME/.gems
