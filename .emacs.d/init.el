@@ -49,7 +49,8 @@
 (add-hook 'rjsx-mode-hook #'electric-pair-local-mode)
 (add-hook 'typescript-mode-hook #'lsp)
 (add-hook 'typescript-mode-hook #'electric-pair-local-mode)
-
+(add-hook 'after-init-hook #'global-flycheck-mode)
+(setq lsp-diagnostics-provider :none)
 (setq gc-cons-threshold (* 100 1024 1024)
       read-process-output-max (* 1024 1024)
       company-idle-delay 0.0
@@ -57,6 +58,7 @@
       create-lockfiles nil) ;; lock files will kill `npm start'
 (global-set-key (kbd "C-;") 'completion-at-point)
 (with-eval-after-load 'lsp-mode
+  (require 'dap-chrome)
   (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
 
@@ -105,7 +107,8 @@
 
 ;;; Spell checking
 (dolist (hook '(text-mode-hook org-mode-hook))
-  (add-hook hook (lambda () (flyspell-mode 1)
+  (add-hook hook (lambda ()
+                   (flyspell-mode 1)
                    (auto-fill-mode 0)
 		   (local-set-key (kbd "C-'") 'other-window)
                    (local-set-key (kbd "M-p") 'org-mark-ring-goto))))
