@@ -14,6 +14,10 @@
 (setq org-default-notes-file "~/Documents/org/notes.org")
 (global-set-key (kbd "C-c c") #'org-capture)
 
+(dolist (hook '(org-mode-hook))
+  (add-hook hook (lambda ()
+		   (local-set-key (kbd "C-c t") 'org-time-stamp-inactive))))
+
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline "" "Tasks")
          "* TODO %?\n  %u\n%i\n")
