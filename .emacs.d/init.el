@@ -61,6 +61,8 @@
   (require 'dap-chrome)
   (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
+(lsp-treemacs-sync-mode 1)
+
 
 ;;; Theme
 (straight-use-package 'soft-charcoal-theme)
