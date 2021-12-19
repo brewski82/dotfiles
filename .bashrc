@@ -22,9 +22,6 @@ export LSCOLORS=Exfxcxdxbxegedabagacad
 # Tell grep to highlight matches
 export GREP_OPTIONS='--color=auto'
 
-export TERM="xterm"
-export PS1='\[\e[32m\]\u@\h \W\[\e[0m\] $ '
-
 # Ruby
 export GEM_HOME=$HOME/.gems
 
@@ -38,6 +35,9 @@ export PATH=$HOME/.gems/bin:$PATH
 
 alias ll="ls -l"
 alias dotfiles="git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+
+# Prompt
+eval "$(starship init bash)"
 
 # Machine specific settings
 if [ -f ~/.bashrc_local ]; then
