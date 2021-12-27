@@ -18,7 +18,7 @@
 (straight-use-package 'helm)
 (global-set-key (kbd "M-x") #'helm-M-x)
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-(global-set-key (kbd "C-x C-f") #'helm-find-files)
+;; (global-set-key (kbd "C-x C-f") #'helm-find-files)
 (helm-mode 1)
 
 (require 'cl-lib)
@@ -232,12 +232,13 @@
 (setq python-shell-interpreter "ipython3"
       python-shell-interpreter-args "--simple-prompt -i")
 
-
-
 ;;; Shell env variables.
 (straight-use-package 'exec-path-from-shell)
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
+
+(straight-use-package 'isend-mode)
+(setq isend-forward-line nil)
 
 ;;; From https://www.emacswiki.org/emacs/SmoothScrolling
 ;; scroll one line at a time (less "jumpy" than defaults)
@@ -286,6 +287,10 @@
 
 
 (setq sentence-end-double-space nil)
+
+;;; IDO
+(ido-mode 1)
+(global-set-key (kbd "C-x C-f") #'find-file)
 
 ;;; Mac setup
 (setq mac-command-modifier 'meta)
