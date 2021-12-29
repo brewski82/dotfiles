@@ -447,3 +447,16 @@
 (add-hook 'python-mode-hook
           (lambda ()
             (define-key python-mode-map (kbd "<f5>") 'william-bruschi/run-current-python-file)))
+
+(defun william-bruschi/isend-block ()
+  "Sends a block of text to a terminal. Use with isend."
+  (interactive)
+  (save-excursion
+    (backward-paragraph)
+    (set-mark-command nil)
+    (forward-paragraph)
+    (isend-send)))
+
+(add-hook 'sh-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c C-c") 'william-bruschi/isend-block)))
