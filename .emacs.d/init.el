@@ -50,7 +50,7 @@
 (add-hook 'typescript-mode-hook #'lsp)
 (add-hook 'typescript-mode-hook #'electric-pair-local-mode)
 (add-hook 'after-init-hook #'global-flycheck-mode)
-(setq lsp-diagnostics-provider :none)
+;(setq lsp-diagnostics-provider :none)
 (setq gc-cons-threshold (* 100 1024 1024)
       read-process-output-max (* 1024 1024)
       company-idle-delay 0.0
@@ -65,8 +65,14 @@
 
 
 ;;; Theme
-(straight-use-package 'soft-charcoal-theme)
-(load-theme 'soft-charcoal t)
+;; (straight-use-package 'soft-charcoal-theme)
+;; (load-theme 'soft-charcoal t)
+;; (straight-use-package 'spacemacs-theme)
+;; (load-theme 'spacemacs-dark t)
+;; (straight-use-package 'monokai-theme)
+;; (load-theme 'monokai t)
+(straight-use-package 'afternoon-theme)
+(load-theme 'afternoon t)
 
 ;;; Buffer settings
 (require 'uniquify)
@@ -289,8 +295,10 @@
 (setq sentence-end-double-space nil)
 
 ;;; IDO
-(ido-mode 1)
-(global-set-key (kbd "C-x C-f") #'find-file)
+;; Turning this off for now as it does not seem to work consistentyly
+;; with helm.
+;; (ido-mode 1)
+;; (global-set-key (kbd "C-x C-f") #'ido-find-file)
 
 ;;; Mac setup
 (setq mac-command-modifier 'meta)

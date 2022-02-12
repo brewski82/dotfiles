@@ -1,8 +1,8 @@
-# .bashrc
+# .zshrc
 
 # Source global definitions
-if [ -f /etc/bashrc ]; then
-	. /etc/bashrc
+if [ -f /etc/zshrc ]; then
+	. /etc/zshrc
 fi
 
 # Source my settings
@@ -11,9 +11,9 @@ if [ -f ~/.myshell ]; then
 fi
 
 # Prompt
-eval "$(starship init bash)"
+eval "$(starship init zsh)"
 
 # Machine specific settings
-if [ -f ~/.bashrc_local ]; then
-	. ~/.bashrc_local
+if [ -f ~/.zshrc_local ]; then
+	. ~/.zshrc_local
 fi
