@@ -10,6 +10,9 @@ if [ -f ~/.myshell ]; then
 	. ~/.myshell
 fi
 
+export HISTFILE=~/.zsh_history
+setopt appendhistory
+
 # Prompt
 eval "$(starship init zsh)"
 
