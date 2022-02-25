@@ -17,3 +17,8 @@ eval "$(starship init bash)"
 if [ -f ~/.bashrc_local ]; then
 	. ~/.bashrc_local
 fi
+
+# git autocomplete
+if [ -f `brew --prefix`/etc/bash_completion.d/git-completion.bash ]; then
+  . `brew --prefix`/etc/bash_completion.d/git-completion.bash
+fi
