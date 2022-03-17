@@ -489,10 +489,14 @@
   (delete-other-windows)
   (split-window-right)
   (magit-show-refs)
-  (other-window)
+  (other-window 1)
   (split-window-right)
+  (other-window 1)
   (magit-log-head)
+  (other-window 2)
   (balance-windows))
+
+(global-set-key [f7] 'william-bruschi/magit-three-windows)
 
 ;;; Recent files
 (recentf-mode 1)
@@ -502,4 +506,4 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(olivetti-body-width (* fill-column 2)))
+ '(olivetti-body-width (* fill-column 3)))
