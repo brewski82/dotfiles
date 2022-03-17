@@ -33,7 +33,7 @@
 (straight-use-package 'flycheck)
 (straight-use-package 'company-mode)
 (straight-use-package 'yasnippet)
-(straight-use-package 'lsp-treemacs)
+;(straight-use-package 'lsp-treemacs)
 (straight-use-package 'helm-lsp)
 (straight-use-package 'dap-mode)
 (straight-use-package 'json-mode)
@@ -41,6 +41,8 @@
 (straight-use-package 'typescript-mode)
 (straight-use-package 'rjsx-mode)
 (straight-use-package 'ts-comint)
+(straight-use-package 'jest)
+(straight-use-package 'prettier)
 (yas-global-mode 1)
 (which-key-mode)
 (add-hook 'python-mode-hook #'lsp)
@@ -56,13 +58,19 @@
       company-idle-delay 0.0
       company-minimum-prefix-length 1
       create-lockfiles nil) ;; lock files will kill `npm start'
-(global-set-key (kbd "C-;") 'completion-at-point)
 (with-eval-after-load 'lsp-mode
   (require 'dap-chrome)
   (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
-(lsp-treemacs-sync-mode 1)
+;(lsp-treemacs-sync-mode 1)
 
+;;; Javascript and Typescript hooks and bindings
+(global-set-key (kbd "C-;") 'completion-at-point)
+(dolist (hook '(rjsx-mode-hook typescript-mode-hook))
+  (add-hook hook (lambda ()
+                   (local-set-key (kbd "C-c j") 'jest-popup)
+                   (local-set-key (kbd "C-c p f") 'prettier-prettify)
+                   (local-set-key (kbd "C-c p r") 'prettier-prettify-region))))
 
 ;;; Theme
 ;; (straight-use-package 'soft-charcoal-theme)
@@ -73,6 +81,9 @@
 ;; (load-theme 'monokai t)
 (straight-use-package 'afternoon-theme)
 (load-theme 'afternoon t)
+
+;;; Center text - also see custom variables at the end
+(straight-use-package 'olivetti)
 
 ;;; Buffer settings
 (require 'uniquify)
@@ -468,3 +479,13 @@
 (add-hook 'sh-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c C-c") 'william-bruschi/isend-block)))
+
+;;; Recent files
+(recentf-mode 1)
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(olivetti-body-width (* fill-column 2)))
