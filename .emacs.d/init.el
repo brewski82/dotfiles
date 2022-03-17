@@ -84,6 +84,8 @@
 
 ;;; Center text - also see custom variables at the end
 (straight-use-package 'olivetti)
+(global-set-key [f9] 'olivetti-mode)
+(global-set-key [f8] 'toggle-frame-maximized)
 
 ;;; Buffer settings
 (require 'uniquify)
