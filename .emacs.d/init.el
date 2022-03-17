@@ -482,6 +482,18 @@
           (lambda ()
             (local-set-key (kbd "C-c C-c") 'william-bruschi/isend-block)))
 
+(defun william-bruschi/magit-three-windows ()
+  "Show three main windows for magit."
+  (interactive)
+  (magit-status)
+  (delete-other-windows)
+  (split-window-right)
+  (magit-show-refs)
+  (other-window)
+  (split-window-right)
+  (magit-log-head)
+  (balance-windows))
+
 ;;; Recent files
 (recentf-mode 1)
 
