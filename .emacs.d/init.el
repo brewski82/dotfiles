@@ -87,6 +87,11 @@
 (global-set-key [f9] 'olivetti-mode)
 (global-set-key [f8] 'toggle-frame-maximized)
 
+;;; Beacon mode - flashes line when you scroll. See customization
+;;; below.
+(straight-use-package 'beacon)
+(beacon-mode 1)
+
 ;;; Buffer settings
 (require 'uniquify)
 (setq
@@ -506,4 +511,15 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(olivetti-body-width (* fill-column 3)))
+ '(beacon-blink-duration 0.6)
+ '(beacon-blink-when-focused t)
+ '(beacon-color 0.8)
+ '(beacon-mode t)
+ '(beacon-size 120)
+ '(olivetti-body-width (* fill-column 2)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
