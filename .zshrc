@@ -20,3 +20,8 @@ eval "$(starship init zsh)"
 if [ -f ~/.zshrc_local ]; then
 	. ~/.zshrc_local
 fi
+
+# https://github.com/akermu/emacs-libvterm#shell-side-configuration
+if [ -f ~/.emacs-vterm-zsh.sh ]; then
+	. ~/.emacs-vterm-zsh.sh
+fi

@@ -33,7 +33,7 @@
 (straight-use-package 'flycheck)
 (straight-use-package 'company-mode)
 (straight-use-package 'yasnippet)
-;(straight-use-package 'lsp-treemacs)
+(straight-use-package 'lsp-treemacs)
 (straight-use-package 'helm-lsp)
 (straight-use-package 'dap-mode)
 (straight-use-package 'json-mode)
@@ -41,16 +41,12 @@
 (straight-use-package 'typescript-mode)
 (straight-use-package 'rjsx-mode)
 (straight-use-package 'ts-comint)
-(straight-use-package 'jest)
+(straight-use-package 'jest-test-mode)
 (straight-use-package 'prettier)
 (yas-global-mode 1)
 (which-key-mode)
 (add-hook 'python-mode-hook #'lsp)
 ;(add-hook 'sh-mode-hook #'lsp)
-(add-hook 'rjsx-mode-hook #'lsp)
-(add-hook 'rjsx-mode-hook #'electric-pair-local-mode)
-(add-hook 'typescript-mode-hook #'lsp)
-(add-hook 'typescript-mode-hook #'electric-pair-local-mode)
 (add-hook 'after-init-hook #'global-flycheck-mode)
 ;(setq lsp-diagnostics-provider :none)
 (setq gc-cons-threshold (* 100 1024 1024)
@@ -62,11 +58,16 @@
   (require 'dap-chrome)
   (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
-;(lsp-treemacs-sync-mode 1)
+(lsp-treemacs-sync-mode 1)
 
 ;;; Javascript and Typescript hooks and bindings
 (global-set-key (kbd "C-;") 'completion-at-point)
+(setq js-indent-level 2)
+(setq typescript-indent-level 2)
 (dolist (hook '(rjsx-mode-hook typescript-mode-hook))
+  (add-hook hook #'lsp)
+  (add-hook hook #'electric-pair-local-mode)
+  (add-hook hook #'jest-test-mode)
   (add-hook hook (lambda ()
                    (local-set-key (kbd "C-c j") 'jest-popup)
                    (local-set-key (kbd "C-c p f") 'prettier-prettify)
@@ -159,6 +160,10 @@
 ;; (setq frame-title-format "Emacs: %b %+%+ %f")
 ;; (setq frame-title-format '("Emacs @ " system-name ": %b %+%+ %f"))
 (setq frame-title-format (concat invocation-name "@" system-name ": %b %+%+ %f"))
+
+;;; vterm https://github.com/akermu/emacs-libvterm
+(straight-use-package 'vterm)
+(setq vterm-max-scrollback 10000)
 
 ;;; Scroll bar
 (straight-use-package 'sml-modeline)
@@ -445,12 +450,12 @@
   (william-bruschi/uniquify-region-lines (point-min) (point-max)))
 
 ;;; For SQL files I like to set tab spaces to 2
-(defun william-bruschi/local-sql-mode-hook-fun ()
+(defun william-bruschi/local-two-spaces-for-tabs-hook ()
   (setq tab-stop-list (number-sequence 2 120 2))
   (setq tab-width 2)
   (setq indent-tabs-mode nil))
 
-(add-hook 'sql-mode-hook 'william-bruschi/local-sql-mode-hook-fun)
+(add-hook 'sql-mode-hook 'william-bruschi/local-two-spaces-for-tabs-hook)
 
 ;;; http://emacsredux.com/blog/2013/03/27/copy-filename-to-the-clipboard/
 (defun william-bruschi/copy-file-name-to-clipboard ()
@@ -506,6 +511,32 @@
 ;;; Recent files
 (recentf-mode 1)
 
+;;; Run command setup
+(straight-use-package 'run-command)
+;;; See https://github.com/bard/emacs-run-command/blob/master/examples/run-command-recipe-package-json.el
+(defun run-command-recipe-package-json--get-scripts (package-json-file)
+  "Extract NPM scripts from `package-json-file'."
+  (with-temp-buffer
+    (insert-file-contents package-json-file)
+    (when-let ((script-hash (gethash "scripts" (json-parse-buffer))))
+      (let (scripts '())
+        (maphash (lambda (key _value) (push key scripts)) script-hash)
+        scripts))))
+
+(defun run-command-recipe-package-json ()
+  (when-let* ((project-dir
+               (locate-dominating-file default-directory "package.json"))
+              (scripts
+               (run-command-recipe-package-json--get-scripts (concat project-dir "package.json")))
+              (script-runner
+               (if (file-exists-p (concat project-dir "yarn.lock")) "yarn" "npm")))
+    (mapcar (lambda (script)
+              (list :command-name script
+                    :command-line (concat script-runner " run " script)
+                    :display script
+                    :working-dir project-dir))
+            scripts)))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -516,7 +547,10 @@
  '(beacon-color 0.8)
  '(beacon-mode t)
  '(beacon-size 120)
- '(olivetti-body-width (* fill-column 2)))
+ '(completion-styles '(basic partial-completion emacs22 flex))
+ '(helm-completion-style 'emacs)
+ '(olivetti-body-width (* fill-column 2))
+ '(run-command-recipes '(ignore run-command-recipe-package-json)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

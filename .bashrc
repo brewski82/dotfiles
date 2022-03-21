@@ -22,3 +22,8 @@ fi
 if [ -f `brew --prefix`/etc/bash_completion.d/git-completion.bash ]; then
   . `brew --prefix`/etc/bash_completion.d/git-completion.bash
 fi
+
+# https://github.com/akermu/emacs-libvterm#shell-side-configuration
+if [ -f ~/.emacs-vterm-bash.sh ]; then
+	. ~/.emacs-vterm-bash.sh
+fi
