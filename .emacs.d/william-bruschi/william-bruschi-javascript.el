@@ -89,6 +89,17 @@ spell checker."
   (interactive)
   (william-bruschi/run-eslint-command "eslint -c ~/.my-eslint-config.yml ."))
 
+(defun william-bruschi/eslint-current-file ()
+  "Runs eslint against the current file"
+  (interactive)
+  (william-bruschi/run-eslint-command (concat "eslint " (buffer-file-name))))
+
+(defun william-bruschi/eslint-current-file-myconfig ()
+  "Runs eslint against the current package"
+  (interactive)
+  (william-bruschi/run-eslint-command
+   (concat "eslint -c ~/.my-eslint-config.yml " (buffer-file-name))))
+
 (define-transient-command william-bruschi/typescript-trainsient ()
   "Typescript Commands"
   [[ "Actions"
@@ -111,8 +122,10 @@ spell checker."
                      (lsp-format-region)
                      (prettier-prettify-region)))]
    [ "Lint"
-     ("e" "project config" william-bruschi/eslint-current-package)
-     ("m" "my config" william-bruschi/eslint-current-package-myconfig)]
+     ("e" "project" william-bruschi/eslint-current-package)
+     ("E" "Me project" william-bruschi/eslint-current-package-myconfig)
+     ("w" "file" william-bruschi/eslint-current-file)
+     ("W" "Me file" william-bruschi/eslint-current-file-myconfig)]
    [ "More"
      ("l" "lsp" william-bruschi/typescript-lsp)
      ("j" "jest" william-bruschi/typescript-jest)]

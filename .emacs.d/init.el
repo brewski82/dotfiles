@@ -545,7 +545,8 @@
   :config
   (super-save-mode +1)
   :custom
-  (super-save-auto-save-when-idle t))
+  (super-save-auto-save-when-idle t)
+  (super-save-idle-duration 1))
 
 ;;; Center text - decided to use centered-window
 ;; (use-package olivetti
@@ -565,7 +566,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(completion-styles '(flex)))
+ '(completion-styles '(flex))
+ '(helm-completion-style 'emacs nil nil "Customized with use-package helm")
+ )
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
