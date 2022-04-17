@@ -1,0 +1,6 @@
+# name : expect.arrayContaining({ ... })
+# contributor : Seong Yong-ju <sei40kr@gmail.com>
+# key: array-containing
+# --
+
+expect.arrayContaining([$0])

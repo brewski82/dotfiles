@@ -1,0 +1,6 @@
+# name : expect.assertions(...)
+# contributor : Seong Yong-ju <sei40kr@gmail.com>
+# key: assertions
+# --
+
+expect.assertions($0);
