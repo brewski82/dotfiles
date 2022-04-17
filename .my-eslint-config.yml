@@ -1,0 +1,127 @@
+# My personal eslint configuration settings for typescript.
+extends: [
+  eslint:recommended
+]
+rules:
+  array-callback-return:
+    - 2
+    - checkForEach: true
+  no-await-in-loop:
+    - 2
+  no-constructor-return:
+    - 2
+  no-duplicate-imports:
+    - 2
+  no-promise-executor-return:
+    - 2
+  no-self-compare:
+    - 2
+  no-unmodified-loop-condition:
+    - 2
+  no-unreachable-loop:
+    - 2
+  no-unused-private-class-members:
+    - 2
+  no-use-before-define:
+    - 2
+  require-atomic-updates:
+    - 2
+  block-scoped-var:
+    - 2
+  class-methods-use-this:
+    - 1
+  complexity:
+    - 1
+    - max: 10
+  consistent-return:
+    - 2
+  consistent-this:
+    - 2
+  curly:
+    - 2
+  default-case:
+    - 1
+  default-case-last:
+    - 2
+  default-param-last:
+    - 2
+  dot-notation:
+    - 1
+    - allowKeywords: false
+  eqeqeq:
+    - 2
+  max-depth:
+    - 1
+    - max: 3
+  max-nested-callbacks:
+    - 1
+    - max: 3
+  max-params:
+    - 1
+  multiline-comment-style:
+    - 1
+  no-empty-function:
+    - 1
+  no-extra-bind:
+    - 2
+  no-lonely-if:
+    - 2
+  no-nested-ternary:
+    - 1
+  no-new-wrappers:
+    - 1
+  no-param-reassign:
+    - 2
+  no-return-assign:
+    - 2
+  no-return-await:
+    - 1
+  no-throw-literal:
+    - 2
+  no-underscore-dangle:
+    - 1
+  no-unneeded-ternary:
+    - 1
+  no-unused-expressions:
+    - 1
+  no-useless-call:
+    - 2
+  no-useless-concat:
+    - 1
+  no-useless-rename:
+    - 1
+  no-useless-return:
+    - 1
+  no-var:
+    - 2
+  no-void:
+    - 2
+  prefer-arrow-callback:
+    - 1
+  prefer-const:
+    - 1
+  prefer-exponentiation-operator:
+    - 1
+  prefer-named-capture-group:
+    - 1
+  prefer-object-has-own:
+    - 1
+  prefer-object-spread:
+    - 1
+  prefer-promise-reject-errors:
+    - 1
+  prefer-regex-literals:
+    - 1
+  prefer-rest-params:
+    - 1
+  prefer-template:
+    - 2
+  require-await:
+    - 2
+  sort-imports:
+    - 1
+  spaced-comment:
+    - 1
+  yoda:
+    - 1
+    - always

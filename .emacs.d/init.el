@@ -13,13 +13,16 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 (straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
 
 ;;; Helm
-(straight-use-package 'helm)
-(global-set-key (kbd "M-x") #'helm-M-x)
-(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-(global-set-key (kbd "C-x C-f") #'helm-find-files)
-(helm-mode 1)
+(use-package helm
+  :bind (("M-x" . helm-M-x)
+         ("C-x C-f" . helm-find-files)
+         ("C-x r b" . helm-filtered-bookmarks))
+  :config (helm-mode 1)
+  :custom
+  (helm-completion-style 'emacs))
 
 (require 'cl-lib)
 
@@ -28,70 +31,83 @@
 (require 'william-bruschi-org-setup nil nil)
 
 ;;; LSP Mode
-(straight-use-package 'lsp-mode)
-(straight-use-package 'lsp-ui)
-(straight-use-package 'flycheck)
-(straight-use-package 'company-mode)
-(straight-use-package 'yasnippet)
-(straight-use-package 'lsp-treemacs)
-(straight-use-package 'helm-lsp)
-(straight-use-package 'dap-mode)
-(straight-use-package 'json-mode)
-(straight-use-package 'which-key)
-(straight-use-package 'typescript-mode)
-(straight-use-package 'rjsx-mode)
-(straight-use-package 'ts-comint)
-(straight-use-package 'jest-test-mode)
-(straight-use-package 'prettier)
-(yas-global-mode 1)
-(which-key-mode)
-(add-hook 'python-mode-hook #'lsp)
-;(add-hook 'sh-mode-hook #'lsp)
-(add-hook 'after-init-hook #'global-flycheck-mode)
-;(setq lsp-diagnostics-provider :none)
-(setq gc-cons-threshold (* 100 1024 1024)
-      read-process-output-max (* 1024 1024)
-      company-idle-delay 0.0
-      company-minimum-prefix-length 1
-      create-lockfiles nil) ;; lock files will kill `npm start'
-(with-eval-after-load 'lsp-mode
-  (require 'dap-chrome)
-  (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
-  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
-(lsp-treemacs-sync-mode 1)
+(use-package lsp-mode
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :bind
+  (:map lsp-mode-map
+        ("M-." . lsp-find-definition)
+        ("C-." . lsp-find-definition)
+        ("C-," . xref-pop-marker-stack))
+  :config
+  (setq gc-cons-threshold (* 100 1024 1024)
+        read-process-output-max (* 1024 1024)
+        create-lockfiles nil)
+  (use-package lsp-ui)
+  (use-package lsp-treemacs
+    :config (lsp-treemacs-sync-mode 1))
+  (use-package helm-lsp)
+  (use-package dap-mode)
+  :hook ((lsp-mode . lsp-enable-which-key-integration)
+         ((python-mode rjsx-mode typescript-mode) . lsp)))
 
-;;; Javascript and Typescript hooks and bindings
-(global-set-key (kbd "C-;") 'completion-at-point)
-(setq js-indent-level 2)
-(setq typescript-indent-level 2)
-(dolist (hook '(rjsx-mode-hook typescript-mode-hook))
-  (add-hook hook #'lsp)
-  (add-hook hook #'electric-pair-local-mode)
-  (add-hook hook #'jest-test-mode)
-  (add-hook hook (lambda ()
-                   (local-set-key (kbd "C-c j") 'jest-popup)
-                   (local-set-key (kbd "C-c p f") 'prettier-prettify)
-                   (local-set-key (kbd "C-c p r") 'prettier-prettify-region))))
+(use-package flycheck)
 
-;;; Theme
+(use-package company-mode
+  :config
+  (setq company-idle-delay 0.0
+        company-minimum-prefix-length 1)
+  :bind (:map company-active-map
+              ("C-n" . company-select-next)
+              ("C-p" . company-select-previous)))
+
+(use-package yasnippet
+  :config (yas-global-mode 1))
+
+(use-package json-mode
+  :config (setq js-indent-level 2))
+(use-package which-key
+  :config (which-key-mode))
+(use-package typescript-mode
+  :config (setq typescript-indent-level 2))
+(use-package rjsx-mode)
+(use-package ts-comint)
+(use-package yaml-mode)
+(use-package jest-test-mode
+  :hook ((rjsx-mode typescript-mode) . jest-test-mode))
+(use-package prettier)
+
+;;; Magit
+(use-package magit
+  :ensure t
+  :bind (("C-x g" . magit-status)))
+
+;;; eslint
+(require 'compile-eslint)
+(push 'eslint compilation-error-regexp-alist)
+
+;;; Typescript and JS config
+(require 'william-bruschi-javascript nil nil)
+
+;;; Themes
 ;; (straight-use-package 'soft-charcoal-theme)
 ;; (load-theme 'soft-charcoal t)
 ;; (straight-use-package 'spacemacs-theme)
 ;; (load-theme 'spacemacs-dark t)
 ;; (straight-use-package 'monokai-theme)
 ;; (load-theme 'monokai t)
-(straight-use-package 'afternoon-theme)
-(load-theme 'afternoon t)
+(use-package afternoon-theme
+  :config (load-theme 'afternoon t))
 
-;;; Center text - also see custom variables at the end
-(straight-use-package 'olivetti)
-(global-set-key [f9] 'olivetti-mode)
-(global-set-key [f8] 'toggle-frame-maximized)
-
-;;; Beacon mode - flashes line when you scroll. See customization
-;;; below.
-(straight-use-package 'beacon)
-(beacon-mode 1)
+;;; Beacon mode - flashes line when you scroll.
+(use-package beacon
+  :config (beacon-mode 1)
+  :custom
+  (beacon-blink-duration 0.6)
+  (beacon-blink-when-focused t)
+  (beacon-color 0.8)
+  (beacon-mode t)
+  (beacon-size 120))
 
 ;;; Buffer settings
 (require 'uniquify)
@@ -162,15 +178,13 @@
 (setq frame-title-format (concat invocation-name "@" system-name ": %b %+%+ %f"))
 
 ;;; vterm https://github.com/akermu/emacs-libvterm
-(straight-use-package 'vterm)
-(setq vterm-max-scrollback 10000)
+(use-package vterm
+  :config (setq vterm-max-scrollback 10000))
 
 ;;; Scroll bar
-(straight-use-package 'sml-modeline)
-(if (require 'sml-modeline nil 'noerror)
-    (progn
-      (sml-modeline-mode 1)
-      (scroll-bar-mode -1))
+(use-package sml-modeline
+  :config
+  (sml-modeline-mode 1)
   (scroll-bar-mode 1)
   (set-scroll-bar-mode 'right))
 
@@ -182,12 +196,6 @@
 
 ;; Disable toolbar mode
 (tool-bar-mode 0)
-
-;; Menu bar
-(global-set-key [f11] 'menu-bar-mode)
-
-;; Switch buffers
-(global-set-key (kbd "C-'") 'other-window)
 
 (put 'downcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
@@ -216,11 +224,8 @@
 (setq-default cursor-type '(bar . 3) blink-cursor-blinks 200)
 
 ;;; Lisp setup
-(straight-use-package 'paredit)
-(dolist (hook '(emacs-lisp-mode-hook
-		lisp-mode-hook
-		slime-repl-mode-hook))
-  (add-hook hook #'(lambda () (paredit-mode 1))))
+(use-package paredit
+  :hook ((emacs-lisp-mode lisp-mode slime-repl-mode) . paredit-mode))
 
 (when (boundp 'wb-load-slime)
   (add-to-list 'load-path wb-slime-load-path)
@@ -262,12 +267,13 @@
       python-shell-interpreter-args "--simple-prompt -i")
 
 ;;; Shell env variables.
-(straight-use-package 'exec-path-from-shell)
-(when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize))
+(use-package exec-path-from-shell
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
 
-(straight-use-package 'isend-mode)
-(setq isend-forward-line nil)
+(use-package isend-mode
+  :config (setq isend-forward-line nil))
 
 ;;; From https://www.emacswiki.org/emacs/SmoothScrolling
 ;; scroll one line at a time (less "jumpy" than defaults)
@@ -275,10 +281,6 @@
 (setq mouse-wheel-progressive-speed t) ;; accelerate scrolling
 (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
 (setq scroll-step 1) ;; keyboard scroll one line at a time
-
-;;; Magit
-(straight-use-package 'magit)
-(global-set-key (kbd "C-x g") 'magit-status)
 
 ;;; Javascript
 (with-eval-after-load 'js
@@ -307,12 +309,6 @@
 ;;             (define-key js-mode-map (kbd "C-c C-c") 'wb-nodejs-repl-send-statement)
 ;;             (define-key js-mode-map (kbd "M-.") 'lsp-goto-type-definition)
 ;;             (electric-pair-local-mode t)))
-
-;;; Company mode map
-(add-hook 'company-mode-hook
-          (lambda ()
-            (define-key company-active-map (kbd "C-n") 'company-select-next)
-            (define-key company-active-map (kbd "C-p") 'company-select-previous)))
 
 
 (setq sentence-end-double-space nil)
@@ -362,8 +358,6 @@
                              (if (boundp 'old-fullscreen) old-fullscreen nil)
                            (progn (setq old-fullscreen current-value)
                                   'fullboth)))))
-
-(global-set-key [f12] 'william-bruschi/toggle-fullscreen)
 
 (defun william-bruschi/wn ()
   (interactive)
@@ -468,7 +462,6 @@
       (kill-new filename)
       (message "Copied buffer file name '%s' to the clipboard." filename))))
 
-
 (defun william-bruschi/run-current-python-file ()
   (interactive)
   (save-buffer)
@@ -506,30 +499,38 @@
   (other-window 2)
   (balance-windows))
 
-(global-set-key [f7] 'william-bruschi/magit-three-windows)
-
 ;;; Recent files
 (recentf-mode 1)
 
 ;;; Run command setup
-(straight-use-package 'run-command)
+(use-package run-command
+  :config (setq run-command-run-method 'term)
+  :custom
+  (run-command-recipes '(ignore run-command-recipe-package-json)))
+
 ;;; See https://github.com/bard/emacs-run-command/blob/master/examples/run-command-recipe-package-json.el
+;;; Adjusted to search the package file for yarn commands.
 (defun run-command-recipe-package-json--get-scripts (package-json-file)
   "Extract NPM scripts from `package-json-file'."
   (with-temp-buffer
     (insert-file-contents package-json-file)
     (when-let ((script-hash (gethash "scripts" (json-parse-buffer))))
-      (let (scripts '())
+      (let ((scripts '())
+            (is-yarn-p (string-match-p "\"yarn\s" (buffer-string))))
         (maphash (lambda (key _value) (push key scripts)) script-hash)
-        scripts))))
+        (list scripts is-yarn-p)))))
 
 (defun run-command-recipe-package-json ()
   (when-let* ((project-dir
                (locate-dominating-file default-directory "package.json"))
-              (scripts
+              (scripts-and-is-yarn-p
                (run-command-recipe-package-json--get-scripts (concat project-dir "package.json")))
+              (scripts (car scripts-and-is-yarn-p))
               (script-runner
-               (if (file-exists-p (concat project-dir "yarn.lock")) "yarn" "npm")))
+               (if (or (cadr scripts-and-is-yarn-p)
+                       (file-exists-p (concat project-dir "yarn.lock")))
+                   "yarn"
+                 "npm")))
     (mapcar (lambda (script)
               (list :command-name script
                     :command-line (concat script-runner " run " script)
@@ -537,23 +538,43 @@
                     :working-dir project-dir))
             scripts)))
 
+(use-package super-save
+  :ensure t
+  :config
+  (super-save-mode +1)
+  :custom
+  (super-save-auto-save-when-idle t))
+
+;;; Center text - decided to use centered-window
+;; (use-package olivetti
+;;   :custom
+;;   (olivetti-body-width (* fill-column 2)))
+(use-package centered-window
+  :ensure t
+  :config
+  (centered-window-mode t)
+  :custom
+  (cwm-centered-window-width 250)
+  (cwm-incremental-padding t)
+  (cwm-incremental-padding-% 1))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(beacon-blink-duration 0.6)
- '(beacon-blink-when-focused t)
- '(beacon-color 0.8)
- '(beacon-mode t)
- '(beacon-size 120)
- '(completion-styles '(basic partial-completion emacs22 flex))
- '(helm-completion-style 'emacs)
- '(olivetti-body-width (* fill-column 2))
- '(run-command-recipes '(ignore run-command-recipe-package-json)))
+ '(completion-styles '(flex)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;;; Global Key bindings
+(global-set-key (kbd "C-'") 'other-window)
+(global-set-key (kbd "C-;") 'completion-at-point)
+(global-set-key [f7] 'william-bruschi/magit-three-windows)
+(global-set-key [f8] 'toggle-frame-maximized)
+(global-set-key [f11] 'menu-bar-mode)
+(global-set-key [f12] 'william-bruschi/toggle-fullscreen)
