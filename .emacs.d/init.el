@@ -49,6 +49,7 @@
   (use-package helm-lsp)
   (use-package dap-mode)
   :hook ((lsp-mode . lsp-enable-which-key-integration)
+         (lsp-mode . flyspell-prog-mode)
          ((python-mode rjsx-mode typescript-mode) . lsp)))
 
 (use-package flycheck)
