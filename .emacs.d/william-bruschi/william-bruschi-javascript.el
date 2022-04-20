@@ -132,10 +132,17 @@ spell checker."
    [ "Other"
      ("s" "spell" william-bruschi/scspell-current-buffer)]])
 
+(defun william-bruschi/run-typescript-menu ()
+  (interactive)
+  (message "im in here")
+  (save-buffer)
+  (message "post save")
+  (william-bruschi/typescript-trainsient))
+
 (dolist (hook '(typescript-mode-hook rjsx-mode-hook))
   (add-hook hook
             (lambda ()
-              (local-set-key (kbd "C-c C-c") 'william-bruschi/typescript-trainsient))))
+              (local-set-key (kbd "C-c C-c") 'william-bruschi/run-typescript-menu))))
 
 ;;; Sending commands to vterm
 ;; (vterm "my-window")

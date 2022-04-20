@@ -49,8 +49,11 @@
   (use-package helm-lsp)
   (use-package dap-mode)
   :hook ((lsp-mode . lsp-enable-which-key-integration)
-         (lsp-mode . flyspell-prog-mode)
+         ;; (lsp-mode . flyspell-prog-mode)
          ((python-mode rjsx-mode typescript-mode) . lsp)))
+
+(setq lsp-disabled-clients '(eslint)
+      lsp-enable-file-watchers nil)
 
 (use-package flycheck)
 
@@ -76,7 +79,9 @@
 (use-package ts-comint)
 (use-package yaml-mode)
 (use-package jest-test-mode
-  :hook ((rjsx-mode typescript-mode) . jest-test-mode))
+  :hook ((rjsx-mode typescript-mode) . jest-test-mode)
+  :custom
+  (jest-test-command-string "yarn run %s jest %s %s"))
 (use-package prettier)
 
 ;;; Magit
@@ -98,8 +103,8 @@
 ;; (load-theme 'spacemacs-dark t)
 ;; (straight-use-package 'monokai-theme)
 ;; (load-theme 'monokai t)
-(use-package afternoon-theme
-  :config (load-theme 'afternoon t))
+;; (use-package afternoon-theme
+;;   :config (load-theme 'afternoon t))
 
 ;;; Beacon mode - flashes line when you scroll.
 (use-package beacon
@@ -107,7 +112,7 @@
   :custom
   (beacon-blink-duration 0.6)
   (beacon-blink-when-focused t)
-  (beacon-color 0.8)
+  (beacon-color .2)
   (beacon-mode t)
   (beacon-size 120))
 
@@ -213,17 +218,19 @@
 (setq visible-bell 1)
 
 ;;; mode line
-(set-face-foreground 'mode-line "white")
-(set-face-background 'mode-line "dark green")
+;; (set-face-foreground 'mode-line "white")
+;; (set-face-background 'mode-line "dark green")
 
 ;;; Highlight the line your are on.
 (global-hl-line-mode 1)
 (set-face-background 'hl-line "gray15")
+(set-face-background 'hl-line "gray25")
 
 ;;; Cursor
 (blink-cursor-mode 1)
 (set-cursor-color "yellow")
-(setq-default cursor-type '(bar . 3) blink-cursor-blinks 200)
+;; (setq-default cursor-type '(bar . 3) blink-cursor-blinks 200)
+(setq-default cursor-type t blink-cursor-blinks 200)
 
 ;;; Lisp setup
 (use-package paredit
@@ -546,20 +553,20 @@
   (super-save-mode +1)
   :custom
   (super-save-auto-save-when-idle t)
-  (super-save-idle-duration 1))
+  (super-save-idle-duration 10))
 
-;;; Center text - decided to use centered-window
+;;; Center text
 ;; (use-package olivetti
 ;;   :custom
 ;;   (olivetti-body-width (* fill-column 2)))
-(use-package centered-window
-  :ensure t
-  :config
-  (centered-window-mode t)
-  :custom
-  (cwm-centered-window-width 250)
-  (cwm-incremental-padding t)
-  (cwm-incremental-padding-% 1))
+;; (use-package centered-window
+;;   :ensure t
+;;   :config
+;;   (centered-window-mode t)
+;;   :custom
+;;   (cwm-centered-window-width 250)
+;;   (cwm-incremental-padding t)
+;;   (cwm-incremental-padding-% 1))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -582,4 +589,32 @@
 (global-set-key [f7] 'william-bruschi/magit-three-windows)
 (global-set-key [f8] 'toggle-frame-maximized)
 (global-set-key [f11] 'menu-bar-mode)
-(global-set-key [f12] 'william-bruschi/toggle-fullscreen)
+(global-set-key [f12] 'recompile)
+
+
+(use-package all-the-icons
+  :if (display-graphic-p))
+
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-vibrant t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
+(use-package solaire-mode
+  :config
+  (solaire-global-mode +1))
+
+(electric-pair-mode 1)
