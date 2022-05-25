@@ -45,7 +45,7 @@
         create-lockfiles nil)
   (use-package lsp-ui)
   (use-package lsp-treemacs
-    :config (lsp-treemacs-sync-mode 1))
+    :config (lsp-treemacs-sync-mode 0))
   (use-package helm-lsp)
   (use-package dap-mode)
   :hook ((lsp-mode . lsp-enable-which-key-integration)
@@ -575,7 +575,7 @@
  ;; If there is more than one, they won't work right.
  '(completion-styles '(flex))
  '(helm-completion-style 'emacs nil nil "Customized with use-package helm")
- )
+ '(markdown-command "/usr/local/bin/pandoc"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
