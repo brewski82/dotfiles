@@ -40,9 +40,14 @@
         ("C-." . lsp-find-definition)
         ("C-," . xref-pop-marker-stack))
   :config
+  (lsp-register-custom-settings
+   '(("completions.completeFunctionCalls" t t)))
   (setq gc-cons-threshold (* 100 1024 1024)
         read-process-output-max (* 1024 1024)
-        create-lockfiles nil)
+        create-lockfiles nil
+        lsp-javascript-suggest-complete-function-calls t)
+  :custom
+  (lsp-enable-snippet t)
   (use-package lsp-ui)
   (use-package lsp-treemacs
     :config (lsp-treemacs-sync-mode 0))
@@ -608,7 +613,7 @@
   ;; Enable custom neotree theme (all-the-icons must be installed!)
   (doom-themes-neotree-config)
   ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  (setq doom-themes-treemacs-theme "doom-colors")
   (doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
