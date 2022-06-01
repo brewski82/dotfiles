@@ -46,13 +46,13 @@
         read-process-output-max (* 1024 1024)
         create-lockfiles nil
         lsp-javascript-suggest-complete-function-calls t)
-  :custom
-  (lsp-enable-snippet t)
   (use-package lsp-ui)
   (use-package lsp-treemacs
     :config (lsp-treemacs-sync-mode 0))
   (use-package helm-lsp)
   (use-package dap-mode)
+  :custom
+  (lsp-enable-snippet t)
   :hook ((lsp-mode . lsp-enable-which-key-integration)
          ;; (lsp-mode . flyspell-prog-mode)
          ((python-mode rjsx-mode typescript-mode) . lsp)))
