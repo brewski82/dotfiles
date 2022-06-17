@@ -19,10 +19,20 @@
 (use-package helm
   :bind (("M-x" . helm-M-x)
          ("C-x C-f" . helm-find-files)
-         ("C-x r b" . helm-filtered-bookmarks))
+         ("C-x r b" . helm-filtered-bookmarks)
+         ("C-x b" . helm-buffers-list))
   :config (helm-mode 1)
   :custom
   (helm-completion-style 'emacs))
+
+;;; Helm buffer ordering per
+;;; http://snowsyn.net/2018/10/21/buffer-ordering-with-helm/ and
+;;; https://github.com/emacs-helm/helm/issues/1492
+(defun nm-around-helm-buffers-sort-transformer (candidates source)
+  candidates)
+
+(advice-add 'helm-buffers-sort-transformer
+            :override #'nm-around-helm-buffers-sort-transformer)
 
 (require 'cl-lib)
 
