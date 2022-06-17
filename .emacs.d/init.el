@@ -23,7 +23,8 @@
          ("C-x b" . helm-buffers-list))
   :config (helm-mode 1)
   :custom
-  (helm-completion-style 'emacs))
+  (helm-completion-style 'emacs)
+  (helm-buffer-max-length 60))
 
 ;;; Helm buffer ordering per
 ;;; http://snowsyn.net/2018/10/21/buffer-ordering-with-helm/ and
