@@ -88,7 +88,7 @@
 (use-package json-mode
   :config (setq js-indent-level 2))
 (use-package which-key
-  :config (which-key-mode))
+  :config (which-key-mode -1))
 (use-package typescript-mode
   :config (setq typescript-indent-level 2))
 (use-package rjsx-mode)
@@ -236,11 +236,6 @@
 ;;; mode line
 ;; (set-face-foreground 'mode-line "white")
 ;; (set-face-background 'mode-line "dark green")
-
-;;; Highlight the line your are on.
-(global-hl-line-mode 1)
-(set-face-background 'hl-line "gray15")
-(set-face-background 'hl-line "gray25")
 
 ;;; Cursor
 (blink-cursor-mode 1)
@@ -589,9 +584,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(compilation-scroll-output 'first-error)
  '(completion-styles '(flex))
  '(helm-completion-style 'emacs nil nil "Customized with use-package helm")
- '(markdown-command "/usr/local/bin/pandoc"))
+ '(markdown-command "/usr/local/bin/pandoc")
+ '(recentf-max-saved-items 500))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -617,7 +614,17 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-vibrant t)
+  ;; (load-theme 'doom-vibrant t)
+  ;; (load-theme 'doom-xcode t)
+  ;; (load-theme 'doom-old-hope t)
+  ;; (load-theme 'doom-oceanic-next t)
+  (load-theme 'doom-monokai-pro t)
+  ;; (load-theme 'doom-monokai-spectrum t)
+
+  (setq doom-monokai-pro-padded-modeline t)
+
+  ;; (setq doom-vibrant-brighter-modeline t
+  ;;       doom-vibrant-brighter-comments t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -634,3 +641,15 @@
   (solaire-global-mode +1))
 
 (electric-pair-mode 1)
+
+;;; Highlight the line your are on.
+(global-hl-line-mode 1)
+(set-face-background 'hl-line "gray15")
+(set-face-background 'hl-line "gray25")
+(set-face-background 'hl-line "gray30")
+(set-face-background 'hl-line "black")
+
+;;; Support color in compilation mode. See
+;;; https://stackoverflow.com/a/71785402q
+(use-package ansi-color
+  :hook (compilation-filter . ansi-color-compilation-filter))
