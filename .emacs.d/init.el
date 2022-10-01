@@ -519,6 +519,21 @@
   (other-window 2)
   (balance-windows))
 
+(defun william-bruschi/vterm-current-dir ()
+  "Opens vterm in a new buffer with a new based on the current
+directory."
+  (interactive)
+  (let* ((current-directory (or (vc-root-dir)
+                                (substitute-in-file-name "$HOME/")
+                                (buffer-file-name)
+                                default-directory))
+         (buffer-name-suffix
+          (file-name-nondirectory
+           (directory-file-name (file-name-directory current-directory))))
+         (vterm-buffer-name (concat "vterm-" buffer-name-suffix))
+         (vterm-buffer (vterm t)))
+    (rename-buffer vterm-buffer-name)))
+
 ;;; Recent files
 (recentf-mode 1)
 
