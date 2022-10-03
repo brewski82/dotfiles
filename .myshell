@@ -44,3 +44,18 @@ fi
 # https://stackoverflow.com/questions/57591432/gpg-signing-failed-inappropriate-ioctl-for-device-on-macos-with-maven
 GPG_TTY=$(tty)
 export GPG_TTY
+
+function unset_aws() {
+    unset AWS_ACCESS_KEY_ID
+    unset AWS_SECRET_ACCESS_KEY
+    unset AWS_SESSION_TOKEN
+}
+
+function assume_role() {
+    export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" \
+                    $(aws sts assume-role \
+                          --role-arn $1 \
+                          --role-session-name bbruschi \
+                          --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" \
+                          --output text))
+}
