@@ -519,20 +519,41 @@
   (other-window 2)
   (balance-windows))
 
+(defun william-bruschi/vterm-open (directory)
+  (let* ((buffer-name-suffix
+          (file-name-nondirectory
+           (directory-file-name (file-name-directory directory))))
+         (vterm-buffer-name (concat "vterm-" buffer-name-suffix))
+         (default-directory directory)
+         (vterm-buffer (vterm t)))
+    (rename-buffer vterm-buffer-name)))
+
 (defun william-bruschi/vterm-current-dir ()
   "Opens vterm in a new buffer with a new based on the current
 directory."
   (interactive)
-  (let* ((current-directory (or (vc-root-dir)
-                                (substitute-in-file-name "$HOME/")
-                                (buffer-file-name)
-                                default-directory))
-         (buffer-name-suffix
-          (file-name-nondirectory
-           (directory-file-name (file-name-directory current-directory))))
-         (vterm-buffer-name (concat "vterm-" buffer-name-suffix))
-         (vterm-buffer (vterm t)))
-    (rename-buffer vterm-buffer-name)))
+  (let* ((current-directory (or (buffer-file-name)
+                                default-directory
+                                (substitute-in-file-name "$HOME/"))))
+    (william-bruschi/vterm-open current-directory)))
+
+(defun william-bruschi/vterm-vc-root ()
+  "Opens vterm in a new buffer in the root vc directory"
+  (interactive)
+  (let* ((current-directory (or (vc-root-dir))))
+    (unless current-directory
+      (error "vc root not found"))
+    (william-bruschi/vterm-open current-directory)))
+
+(defun william-bruschi/vterm-package ()
+  "Opens vterm in a new buffer in the nearest package.json
+directory."
+  (interactive)
+  (let* ((current-directory (jest-test-project-root (or (buffer-file-name)
+                                                        default-directory))))
+    (unless current-directory
+      (error "package not found"))
+    (william-bruschi/vterm-open current-directory)))
 
 ;;; Recent files
 (recentf-mode 1)
