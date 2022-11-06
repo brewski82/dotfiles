@@ -482,6 +482,18 @@
       (kill-new filename)
       (message "Copied buffer file name '%s' to the clipboard." filename))))
 
+(defun william-bruschi/copy-file-name-from-vc-root-to-clipboard ()
+  "Copy the current buffer file name to the clipboard, excluding
+the heirarchy outside the vc root."
+  (interactive)
+  (let ((filename (if (equal major-mode 'dired-mode)
+                      default-directory
+                    (buffer-file-name))))
+    (when filename
+      (let ((filename-vc-root (file-relative-name filename (file-name-directory (directory-file-name (vc-root-dir))))))
+        (kill-new filename-vc-root)
+        (message "Copied buffer file name '%s' to the clipboard." filename-vc-root)))))
+
 (defun william-bruschi/run-current-python-file ()
   (interactive)
   (save-buffer)
