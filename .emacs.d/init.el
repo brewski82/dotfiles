@@ -109,8 +109,6 @@
 (require 'compile-eslint)
 (push 'eslint compilation-error-regexp-alist)
 
-;;; Typescript and JS config
-(require 'william-bruschi-javascript nil nil)
 
 ;;; Themes
 ;; (straight-use-package 'soft-charcoal-theme)
@@ -701,3 +699,6 @@ directory."
 ;;; https://stackoverflow.com/a/71785402q
 (use-package ansi-color
   :hook (compilation-filter . ansi-color-compilation-filter))
+
+;;; Typescript and JS config
+(require 'william-bruschi-javascript nil nil)

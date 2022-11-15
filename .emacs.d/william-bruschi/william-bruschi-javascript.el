@@ -17,7 +17,7 @@ spell checker."
   (let ((command (concat "scspell --report-only " (buffer-file-name))))
     (william-bruschi/run-compile command)))
 
-(define-transient-command william-bruschi/typescript-jest ()
+(transient-define-prefix william-bruschi/typescript-jest ()
   "Jest Test Commands"
   ["Test"
    [ "Current"
@@ -31,13 +31,13 @@ spell checker."
      ("w" "debug current" jest-test-debug-run-at-point)
      ("e" "debug last" jest-test-debug-rerun-test)]])
 
-(define-transient-command william-bruschi/typescript-prettier ()
+(transient-define-prefix william-bruschi/typescript-prettier ()
   "Prettier Commands"
   [ "Prettier Current"
      ("f" "file" prettier-prettify)
      ("r" "region" prettier-prettify-region)])
 
-(define-transient-command william-bruschi/typescript-lsp ()
+(transient-define-prefix william-bruschi/typescript-lsp ()
   "LSP Commands"
   [["Workspace"
     ("w" "add" lsp-workspace-folders-add)
@@ -100,7 +100,7 @@ spell checker."
   (william-bruschi/run-eslint-command
    (concat "eslint -c ~/.my-eslint-config.yml " (buffer-file-name))))
 
-(define-transient-command william-bruschi/typescript-trainsient ()
+(transient-define-prefix william-bruschi/typescript-trainsient ()
   "Typescript Commands"
   [[ "Actions"
      ("c" "package command" run-command)
