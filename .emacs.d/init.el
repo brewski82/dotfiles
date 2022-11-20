@@ -565,6 +565,16 @@ directory."
       (error "package not found"))
     (william-bruschi/vterm-open current-directory)))
 
+(defun william-bruschi/compile (command)
+  "Runs compile with bash login shell"
+  (interactive "scommand: ")
+  (let ((comint-scroll-to-bottom-on-input t)
+        (comint-scroll-to-bottom-on-output t)
+        (comint-process-echoes t))
+    ;; TODO: figure out how to prevent <RET> from re-sending the old input
+    ;; See https://stackoverflow.com/questions/51275228/avoid-accidental-execution-in-comint-mode
+    (compilation-start (concat "bash -i -c \"" command "\"") nil)))
+
 ;;; Recent files
 (recentf-mode 1)
 
