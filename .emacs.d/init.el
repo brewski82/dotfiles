@@ -670,11 +670,11 @@ directory."
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; (load-theme 'doom-vibrant t)
+  (load-theme 'doom-vibrant t)
   ;; (load-theme 'doom-xcode t)
   ;; (load-theme 'doom-old-hope t)
   ;; (load-theme 'doom-oceanic-next t)
-  (load-theme 'doom-monokai-pro t)
+  ;; (load-theme 'doom-monokai-pro t)
   ;; (load-theme 'doom-monokai-spectrum t)
 
   (setq doom-monokai-pro-padded-modeline t)
@@ -685,10 +685,10 @@ directory."
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
   ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
+  ;; (doom-themes-neotree-config)
   ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-colors")
-  (doom-themes-treemacs-config)
+  ;; (setq doom-themes-treemacs-theme "doom-colors")
+  ;; (doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
