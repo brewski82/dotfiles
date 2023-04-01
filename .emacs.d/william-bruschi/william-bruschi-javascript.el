@@ -116,6 +116,7 @@ spell checker."
      ("f" "file" (lambda ()
                    (interactive)
                    (lsp-format-buffer)
+                   (lsp-organize-imports)
                    (prettier-prettify)))
      ("R" "region" (lambda ()
                      (interactive)

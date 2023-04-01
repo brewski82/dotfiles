@@ -64,12 +64,14 @@
   (use-package dap-mode)
   :custom
   (lsp-enable-snippet t)
+  (lsp-ui-doc-position 'at-point)
+  (lsp-disabled-clients '(eslint))
+  (lsp-enable-file-watchers nil)
+  (lsp-ui-doc-show-with-cursor t)
+  (lsp-ui-doc-delay 2)
   :hook ((lsp-mode . lsp-enable-which-key-integration)
          ;; (lsp-mode . flyspell-prog-mode)
          ((python-mode rjsx-mode typescript-mode) . lsp)))
-
-(setq lsp-disabled-clients '(eslint)
-      lsp-enable-file-watchers nil)
 
 (use-package flycheck)
 
