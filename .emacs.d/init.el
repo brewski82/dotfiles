@@ -582,8 +582,8 @@ directory."
 
 ;;; Run command setup
 (use-package run-command
-  :config (setq run-command-run-method 'term)
   :custom
+  (run-command-default-runner 'run-command-runner-compile)
   (run-command-recipes '(ignore run-command-recipe-package-json)))
 
 ;;; See https://github.com/bard/emacs-run-command/blob/master/examples/run-command-recipe-package-json.el
