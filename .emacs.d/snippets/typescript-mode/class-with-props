@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: Class with props
+# key: classp
+# --
+export interface $1Props {
+  $2
+}
+
+export class $1 {
+  $2
+
+
+  constructor(props: $1Props) {
+${2:$(mapconcat (lambda (x) (let ((name (s-trim (car (split-string x ":" t "[ \t\n]")))))
+                       (format "this.%s = props.%s" name name)))
+                (split-string yas-text ";" t "[ \t\n]")
+                ";\n")}
+
+ }
+
+  $0
+
+}
