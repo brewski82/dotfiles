@@ -42,38 +42,38 @@
 (require 'william-bruschi-org-setup nil nil)
 
 ;;; LSP Mode
-(use-package lsp-mode
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  :bind
-  (:map lsp-mode-map
-        ("M-." . lsp-find-definition)
-        ("C-." . lsp-find-definition)
-        ("C-," . xref-pop-marker-stack))
-  :config
-  (lsp-register-custom-settings
-   '(("completions.completeFunctionCalls" t t)))
-  (setq gc-cons-threshold (* 100 1024 1024)
-        read-process-output-max (* 1024 1024)
-        create-lockfiles nil
-        lsp-javascript-suggest-complete-function-calls t)
-  (use-package lsp-ui)
-  (use-package lsp-treemacs
-    :config (lsp-treemacs-sync-mode 0))
-  (use-package helm-lsp)
-  (use-package dap-mode)
-  :custom
-  (lsp-enable-snippet t)
-  (lsp-ui-doc-position 'at-point)
-  (lsp-disabled-clients '(eslint))
-  (lsp-enable-file-watchers nil)
-  (lsp-ui-doc-show-with-cursor t)
-  (lsp-ui-doc-delay 2)
-  :hook ((lsp-mode . lsp-enable-which-key-integration)
-         ;; (lsp-mode . flyspell-prog-mode)
-         ((python-mode rjsx-mode typescript-mode) . lsp)))
+;; (use-package lsp-mode
+;;   :init
+;;   (setq lsp-keymap-prefix "C-c l")
+;;   :bind
+;;   (:map lsp-mode-map
+;;         ("M-." . lsp-find-definition)
+;;         ("C-." . lsp-find-definition)
+;;         ("C-," . xref-pop-marker-stack))
+;;   :config
+;;   (lsp-register-custom-settings
+;;    '(("completions.completeFunctionCalls" t t)))
+;;   (setq gc-cons-threshold (* 100 1024 1024)
+;;         read-process-output-max (* 1024 1024)
+;;         create-lockfiles nil
+;;         lsp-javascript-suggest-complete-function-calls t)
+;;   (use-package lsp-ui)
+;;   (use-package lsp-treemacs
+;;     :config (lsp-treemacs-sync-mode 0))
+;;   (use-package helm-lsp)
+;;   (use-package dap-mode)
+;;   :custom
+;;   (lsp-enable-snippet t)
+;;   (lsp-ui-doc-position 'at-point)
+;;   (lsp-disabled-clients '(eslint))
+;;   (lsp-enable-file-watchers nil)
+;;   (lsp-ui-doc-show-with-cursor t)
+;;   (lsp-ui-doc-delay 2)
+;;   :hook ((lsp-mode . lsp-enable-which-key-integration)
+;;          ;; (lsp-mode . flyspell-prog-mode)
+;;          ((python-mode rjsx-mode typescript-mode) . lsp)))
 
-(use-package flycheck)
+;; (use-package flycheck)
 
 (use-package company-mode
   :config
@@ -85,7 +85,7 @@
 
 (use-package yasnippet
   :config (yas-global-mode 1))
-(use-package yasnippet-snippets)
+;;; (use-package yasnippet-snippets)
 
 (use-package json-mode
   :config (setq js-indent-level 2))
@@ -101,6 +101,19 @@
   :custom
   (jest-test-command-string "yarn run %s jest %s %s"))
 (use-package prettier)
+
+(use-package eglot
+  :hook ((python-mode rjsx-mode typescript-mode) . eglot-ensure)
+  :hook ((typescript-mode) .
+         (lambda ()
+           (eglot--code-action eglot-code-action-organize-imports "source.organizeImports.ts")))
+  :bind
+  (:map eglot-mode-map
+        ("M-." . xref-find-definitions)
+        ("C-." . xref-find-definitions)
+        ("C-," . xref-pop-marker-stack))
+  :custom
+  (eglot-confirm-server-initiated-edits nil))
 
 ;;; Magit
 (use-package magit
@@ -666,37 +679,68 @@ directory."
 (use-package all-the-icons
   :if (display-graphic-p))
 
-(use-package doom-themes
+(use-package material-theme
   :ensure t
   :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-vibrant t)
-  ;; (load-theme 'doom-xcode t)
-  ;; (load-theme 'doom-old-hope t)
-  ;; (load-theme 'doom-oceanic-next t)
-  ;; (load-theme 'doom-monokai-pro t)
-  ;; (load-theme 'doom-monokai-spectrum t)
+  (load-theme 'material t))
 
-  (setq doom-monokai-pro-padded-modeline t)
+;;; https://github.com/xenodium/dotsies/blob/main/emacs/features/fe-ui.el
+(set-face-attribute 'default nil
+                    :stipple nil
+                    :background "#212121"
+                    :foreground "#eeffff"
+                    :inverse-video nil
+                    ;; :family "Menlo" ;; or Meslo if unavailable: https://github.com/andreberg/Meslo-Font
+                    ;; :family "Hack" ;; brew tap homebrew/cask-fonts && brew cask install font-hack
+                    :family "JetBrains Mono" ;; brew tap homebrew/cask-fonts && brew install --cask font-jetbrains-mono
+                    ;; :family "mononoki" ;; https://madmalik.github.io/mononoki/ or sudo apt-get install fonts-mononoki
+                    :box nil
+                    :strike-through nil
+                    :overline nil
+                    :underline nil
+                    :slant 'normal
+                    :weight 'normal
+                    :width 'normal
+                    :foundry "nil")
 
-  ;; (setq doom-vibrant-brighter-modeline t
-  ;;       doom-vibrant-brighter-comments t)
 
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  ;; (doom-themes-neotree-config)
-  ;; or for treemacs users
-  ;; (setq doom-themes-treemacs-theme "doom-colors")
-  ;; (doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+;; (straight-use-package
+;;  '(nano-emacs :type git :host github :repo "rougier/nano-emacs"))
 
-(use-package solaire-mode
-  :config
-  (solaire-global-mode +1))
+;; (require 'nano)
+;; (nano-theme-set-dark)
+;; (nano-theme)
+;; (use-package doom-themes
+;;   :ensure t
+;;   :config
+;;   ;; Global settings (defaults)
+;;   (setq doom-themes-enable-bold t      ; if nil, bold is universally disabled
+;;         doom-themes-enable-italic t)   ; if nil, italics is universally disabled
+;;   (load-theme 'doom-vibrant t)
+;;   ;; (load-theme 'doom-xcode t)
+;;   ;; (load-theme 'doom-old-hope t)
+;;   ;; (load-theme 'doom-oceanic-next t)
+;;   ;; (load-theme 'doom-monokai-pro t)
+;;   ;; (load-theme 'doom-monokai-spectrum t)
+
+;;   (setq doom-monokai-pro-padded-modeline t)
+
+;;   ;; (setq doom-vibrant-brighter-modeline t
+;;   ;;       doom-vibrant-brighter-comments t)
+
+;;   ;; Enable flashing mode-line on errors
+;;   (doom-themes-visual-bell-config)
+;;   ;; Enable custom neotree theme (all-the-icons must be installed!)
+;;   ;; (doom-themes-neotree-config)
+;;   ;; or for treemacs users
+;;   ;; (setq doom-themes-treemacs-theme "doom-colors")
+;;   ;; (doom-themes-treemacs-config)
+;;   ;; Corrects (and improves) org-mode's native fontification.
+;;   (doom-themes-org-config))
+
+;; (use-package solaire-mode
+;;   :config
+;;   (solaire-global-mode +1))
 
 (electric-pair-mode 1)
 
