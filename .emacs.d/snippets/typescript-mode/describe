@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: Jest Descript
+# key: descr
+# --
+describe('$1', () => {
+  beforeEach(() => {
+    jest.resetModules();
+    jest.resetAllMocks();
+  });
+
+  $0
+})

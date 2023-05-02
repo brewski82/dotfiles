@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: async method
+# key: amet
+# --
+async ${1:name}(${2:arg}): Promise<${3:void}> {
+  $0
+}

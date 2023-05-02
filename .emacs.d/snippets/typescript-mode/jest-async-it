@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Jest Async It
+# key: ait
+# --
+it('$1', async () => {
+  $0
+})
