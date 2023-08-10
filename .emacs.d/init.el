@@ -357,6 +357,11 @@
 (setq mac-option-modifier 'meta)
 
 ;;; My functions
+
+(defun william-bruschi/eglot-current-server ()
+  (interactive)
+  (message "%s" (process-command (jsonrpc--process (eglot-current-server)))))
+
 (defun william-bruschi/remove-delete-whitespace-hook ()
   (interactive)
   (remove-hook 'before-save-hook 'delete-trailing-whitespace t))
