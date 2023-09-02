@@ -642,6 +642,9 @@ directory."
   (super-save-auto-save-when-idle t)
   (super-save-idle-duration 10))
 
+;;; https://github.com/akicho8/string-inflection
+(use-package string-inflection)
+
 ;;; Center text
 ;; (use-package olivetti
 ;;   :custom
