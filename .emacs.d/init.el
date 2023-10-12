@@ -15,12 +15,16 @@
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 
+(push "~/.emacs.d/william-bruschi" load-path)
+(require 'william-bruschi-init-pre nil nil)
+
 ;;; Helm
 (use-package helm
   :bind (("M-x" . helm-M-x)
          ("C-x C-f" . helm-find-files)
          ("C-x r b" . helm-filtered-bookmarks)
-         ("C-x b" . helm-buffers-list))
+         ("C-x b" . helm-buffers-list)
+         ("M-s o" . helm-occur))
   :config (helm-mode 1)
   :custom
   (helm-completion-style 'emacs)
@@ -38,42 +42,7 @@
 (require 'cl-lib)
 
 ;;; Org
-(push "~/.emacs.d/william-bruschi" load-path)
 (require 'william-bruschi-org-setup nil nil)
-
-;;; LSP Mode
-;; (use-package lsp-mode
-;;   :init
-;;   (setq lsp-keymap-prefix "C-c l")
-;;   :bind
-;;   (:map lsp-mode-map
-;;         ("M-." . lsp-find-definition)
-;;         ("C-." . lsp-find-definition)
-;;         ("C-," . xref-pop-marker-stack))
-;;   :config
-;;   (lsp-register-custom-settings
-;;    '(("completions.completeFunctionCalls" t t)))
-;;   (setq gc-cons-threshold (* 100 1024 1024)
-;;         read-process-output-max (* 1024 1024)
-;;         create-lockfiles nil
-;;         lsp-javascript-suggest-complete-function-calls t)
-;;   (use-package lsp-ui)
-;;   (use-package lsp-treemacs
-;;     :config (lsp-treemacs-sync-mode 0))
-;;   (use-package helm-lsp)
-;;   (use-package dap-mode)
-;;   :custom
-;;   (lsp-enable-snippet t)
-;;   (lsp-ui-doc-position 'at-point)
-;;   (lsp-disabled-clients '(eslint))
-;;   (lsp-enable-file-watchers nil)
-;;   (lsp-ui-doc-show-with-cursor t)
-;;   (lsp-ui-doc-delay 2)
-;;   :hook ((lsp-mode . lsp-enable-which-key-integration)
-;;          ;; (lsp-mode . flyspell-prog-mode)
-;;          ((python-mode rjsx-mode typescript-mode) . lsp)))
-
-;; (use-package flycheck)
 
 (use-package company-mode
   :config
@@ -85,7 +54,6 @@
 
 (use-package yasnippet
   :config (yas-global-mode 1))
-;;; (use-package yasnippet-snippets)
 
 (use-package json-mode
   :config (setq js-indent-level 2))
@@ -102,18 +70,14 @@
   (jest-test-command-string "yarn run %s jest %s %s"))
 (use-package prettier)
 
-(use-package eglot
-  :hook ((python-mode rjsx-mode typescript-mode) . eglot-ensure)
-  :hook ((typescript-mode) .
-         (lambda ()
-           (eglot--code-action eglot-code-action-organize-imports "source.organizeImports.ts")))
-  :bind
-  (:map eglot-mode-map
-        ("M-." . xref-find-definitions)
-        ("C-." . xref-find-definitions)
-        ("C-," . xref-pop-marker-stack))
-  :custom
-  (eglot-confirm-server-initiated-edits nil))
+;;; eglot config
+(dolist (hook '(python-mode-hook rjsx-mode-hook typescript-mode-hook))
+  (add-hook hook (lambda ()
+                   (eglot-ensure)
+                   (company-mode 1)
+                   (define-key eglot-mode-map (kbd "M-.") 'xref-find-definitions)
+                   (define-key eglot-mode-map (kbd "C-.") 'xref-find-definitions)
+                   (define-key eglot-mode-map (kbd "C-,") 'xref-go-back))))
 
 ;;; Magit
 (use-package magit
@@ -123,17 +87,6 @@
 ;;; eslint
 (require 'compile-eslint)
 (push 'eslint compilation-error-regexp-alist)
-
-
-;;; Themes
-;; (straight-use-package 'soft-charcoal-theme)
-;; (load-theme 'soft-charcoal t)
-;; (straight-use-package 'spacemacs-theme)
-;; (load-theme 'spacemacs-dark t)
-;; (straight-use-package 'monokai-theme)
-;; (load-theme 'monokai t)
-;; (use-package afternoon-theme
-;;   :config (load-theme 'afternoon t))
 
 ;;; Beacon mode - flashes line when you scroll.
 (use-package beacon
@@ -253,7 +206,6 @@
 ;;; Cursor
 (blink-cursor-mode 1)
 (set-cursor-color "yellow")
-;; (setq-default cursor-type '(bar . 3) blink-cursor-blinks 200)
 (setq-default cursor-type t blink-cursor-blinks 200)
 
 ;;; Lisp setup
@@ -308,6 +260,8 @@
 (use-package isend-mode
   :config (setq isend-forward-line nil))
 
+(use-package markdown-mode)
+
 ;;; From https://www.emacswiki.org/emacs/SmoothScrolling
 ;; scroll one line at a time (less "jumpy" than defaults)
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
@@ -322,27 +276,6 @@
 (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
 ;; (add-to-list 'auto-mode-alist '("\\.ts\\'" . rjsx-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
-
-;;; Function to send current statement or function to nodejs repl.
-;; (defun wb-nodejs-repl-send-statement ()
-;;   (interactive)
-;;   (save-excursion
-;;     (mark-defun)
-;;     (nodejs-repl-send-region (region-beginning) (region-end))
-;;     (deactivate-mark)))
-
-;; (add-hook 'rjsx-mode-hook
-;;           (lambda ()
-;;             (define-key js-mode-map (kbd "C-x C-e") 'nodejs-repl-send-last-expression)
-;;             (define-key js-mode-map (kbd "C-c C-j") 'nodejs-repl-send-line)
-;;             (define-key js-mode-map (kbd "C-c C-r") 'nodejs-repl-send-region)
-;;             (define-key js-mode-map (kbd "C-c C-l") 'nodejs-repl-load-file)
-;;             (define-key js-mode-map (kbd "C-c C-z") 'nodejs-repl-switch-to-repl)
-;;             (define-key js-mode-map (kbd "C-c C-b") 'nodejs-repl-send-buffer)
-;;             (define-key js-mode-map (kbd "C-c C-c") 'wb-nodejs-repl-send-statement)
-;;             (define-key js-mode-map (kbd "M-.") 'lsp-goto-type-definition)
-;;             (electric-pair-local-mode t)))
-
 
 (setq sentence-end-double-space nil)
 
@@ -664,10 +597,13 @@ directory."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(compilation-scroll-output t)
- '(completion-styles '(flex))
- '(helm-completion-style 'emacs nil nil "Customized with use-package helm")
- '(markdown-command "/usr/local/bin/pandoc")
- '(recentf-max-saved-items 500))
+ '(eglot-confirm-server-initiated-edits nil)
+ '(markdown-command william-bruschi/markdown-command)
+ '(recentf-max-saved-items 500)
+ '(safe-local-variable-values
+   '((william-bruschi/prettier . "npx prettier --write")
+     (william-bruschi/prettier . "npx prettier")
+     (william-bruschi/eslint . "npx eslint"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -766,3 +702,5 @@ directory."
 
 ;;; Typescript and JS config
 (require 'william-bruschi-javascript nil nil)
+
+(require 'william-bruschi-init-post nil t)

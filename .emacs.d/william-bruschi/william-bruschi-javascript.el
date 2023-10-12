@@ -10,6 +10,11 @@
     ;; See https://stackoverflow.com/questions/51275228/avoid-accidental-execution-in-comint-mode
     (compilation-start command t)))
 
+(defun william-bruschi/run-compile-from-package-root (command)
+  "Runs command from npm package root dir"
+  (jest-test-from-project-directory (buffer-file-name)
+    (william-bruschi/run-compile command)))
+
 (defun william-bruschi/scspell-current-buffer ()
   "Spell check the current buffer using scspell, the source code
 spell checker."
@@ -30,12 +35,6 @@ spell checker."
      ("q" "debug file" jest-test-debug)
      ("w" "debug current" jest-test-debug-run-at-point)
      ("e" "debug last" jest-test-debug-rerun-test)]])
-
-(transient-define-prefix william-bruschi/typescript-prettier ()
-  "Prettier Commands"
-  [ "Prettier Current"
-     ("f" "file" prettier-prettify)
-     ("r" "region" prettier-prettify-region)])
 
 (transient-define-prefix william-bruschi/typescript-lsp ()
   "LSP Commands"
@@ -90,36 +89,46 @@ spell checker."
     ("d" "describe" eldoc)]
    ])
 
+(defvar william-bruschi/prettier "prettier --write"
+  "command to run prettier")
+
+(defun william-bruschi/run-prettier-command (command)
+  "Runs a prettier command"
+  (william-bruschi/run-compile-from-package-root
+   (concat william-bruschi/prettier " " command)))
+
+(defun william-bruschi/run-prettier-current-file ()
+  "Runs a prettier on current file"
+  (william-bruschi/run-prettier-command (buffer-file-name)))
+
+(defvar william-bruschi/eslint "eslint"
+  "command to run eslint")
+
 (defun william-bruschi/run-eslint-command (command)
   "Runs an eslint command"
-  (jest-test-from-project-directory (buffer-file-name)
-    (let ((comint-scroll-to-bottom-on-input t)
-          (comint-scroll-to-bottom-on-output t)
-          (comint-process-echoes t))
-      ;; TODO: figure out how to prevent <RET> from re-sending the old input
-      ;; See https://stackoverflow.com/questions/51275228/avoid-accidental-execution-in-comint-mode
-      (compilation-start command t))))
+  (william-bruschi/run-compile-from-package-root
+   (concat william-bruschi/eslint " " command)))
 
 (defun william-bruschi/eslint-current-package ()
   "Runs eslint against the current package"
   (interactive)
-  (william-bruschi/run-eslint-command "eslint ."))
+  (william-bruschi/run-eslint-command "."))
 
 (defun william-bruschi/eslint-current-package-myconfig ()
   "Runs eslint against the current package"
   (interactive)
-  (william-bruschi/run-eslint-command "eslint -c ~/.my-eslint-config.yml ."))
+  (william-bruschi/run-eslint-command "-c ~/.my-eslint-config.yml ."))
 
 (defun william-bruschi/eslint-current-file ()
   "Runs eslint against the current file"
   (interactive)
-  (william-bruschi/run-eslint-command (concat "eslint " (buffer-file-name))))
+  (william-bruschi/run-eslint-command (buffer-file-name)))
 
 (defun william-bruschi/eslint-current-file-myconfig ()
   "Runs eslint against the current package"
   (interactive)
   (william-bruschi/run-eslint-command
-   (concat "eslint -c ~/.my-eslint-config.yml " (buffer-file-name))))
+   (concat "-c ~/.my-eslint-config.yml " (buffer-file-name))))
 
 (transient-define-prefix william-bruschi/typescript-trainsient ()
   "Typescript Commands"
@@ -136,11 +145,7 @@ spell checker."
      ("f" "file" (lambda ()
                    (interactive)
                    (eglot-format-buffer)
-                   (prettier-prettify)))
-     ("R" "region" (lambda ()
-                     (interactive)
-                     (eglot-format)
-                     (prettier-prettify-region)))]
+                   (william-bruschi/run-prettier-current-file)))]
    [ "Lint"
      ("e" "project" william-bruschi/eslint-current-package)
      ("E" "Me project" william-bruschi/eslint-current-package-myconfig)
@@ -150,13 +155,12 @@ spell checker."
      ("g" "eglot" william-bruschi/typescript-eglot)
      ("j" "jest" william-bruschi/typescript-jest)]
    [ "Other"
-     ("s" "spell" william-bruschi/scspell-current-buffer)]])
+     ("s" "spell" william-bruschi/scspell-current-buffer)
+     ("i" "imenu" helm-imenu)]])
 
 (defun william-bruschi/run-typescript-menu ()
   (interactive)
-  (message "im in here")
   (save-buffer)
-  (message "post save")
   (william-bruschi/typescript-trainsient))
 
 (dolist (hook '(typescript-mode-hook rjsx-mode-hook))
