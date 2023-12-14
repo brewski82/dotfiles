@@ -75,7 +75,8 @@
   (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
   ;; by default, typescript-mode is mapped to the treesitter typescript parser
   ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
-  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx))
+  :custom (typescript-indent-level 2))
 
 (use-package rjsx-mode)
 (use-package ts-comint)
@@ -617,7 +618,8 @@ directory."
  '(markdown-command william-bruschi/markdown-command)
  '(recentf-max-saved-items 500)
  '(safe-local-variable-values
-   '((william-bruschi/prettier . "npx prettier --write")
+   '((william-bruschi/prettier . "npm run prettier")
+     (william-bruschi/prettier . "npx prettier --write")
      (william-bruschi/prettier . "npx prettier")
      (william-bruschi/eslint . "npx eslint"))))
 (custom-set-faces

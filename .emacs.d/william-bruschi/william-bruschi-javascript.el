@@ -89,8 +89,9 @@ spell checker."
     ("d" "describe" eldoc)]
    ])
 
-(defvar william-bruschi/prettier "prettier --write"
-  "command to run prettier")
+(defcustom william-bruschi/prettier "prettier --write"
+  "command to run prettier"
+  :safe (lambda (x) t))
 
 (defun william-bruschi/run-prettier-command (command)
   "Runs a prettier command"
@@ -101,8 +102,9 @@ spell checker."
   "Runs a prettier on current file"
   (william-bruschi/run-prettier-command (buffer-file-name)))
 
-(defvar william-bruschi/eslint "eslint"
-  "command to run eslint")
+(defcustom william-bruschi/eslint "eslint"
+  "command to run eslint"
+  :safe (lambda (x) t))
 
 (defun william-bruschi/run-eslint-command (command)
   "Runs an eslint command"
