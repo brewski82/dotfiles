@@ -146,8 +146,9 @@ spell checker."
    [ "Format"
      ("f" "file" (lambda ()
                    (interactive)
-                   (eglot-format-buffer)
-                   (william-bruschi/run-prettier-current-file)))]
+                   (save-buffer)
+                   (william-bruschi/run-prettier-current-file)
+                   (revert-buffer t t)))]
    [ "Lint"
      ("e" "project" william-bruschi/eslint-current-package)
      ("E" "Me project" william-bruschi/eslint-current-package-myconfig)
