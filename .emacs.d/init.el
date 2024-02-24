@@ -105,6 +105,10 @@
 (require 'compile-eslint)
 (push 'eslint compilation-error-regexp-alist)
 
+;;; avy https://github.com/abo-abo/avy
+(use-package avy
+  :bind (("M-'" . avy-goto-char-2)))
+
 ;;; Beacon mode - flashes line when you scroll.
 (use-package beacon
   :config (beacon-mode 1)
@@ -545,6 +549,14 @@ directory."
     ;; See https://stackoverflow.com/questions/51275228/avoid-accidental-execution-in-comint-mode
     (compilation-start (concat "bash -i -c \"" command "\"") nil)))
 
+(defun william-bruschi/open-in-intellij ()
+  "Opens the current file in intellij. Requires the idea shell
+script file to be on PATH."
+  (interactive)
+  (start-process "emacs-open-in-intellij" nil
+                 "idea" "--line" (number-to-string (line-number-at-pos))
+                 (buffer-file-name)))
+
 ;;; Recent files
 (recentf-mode 1)
 
@@ -596,9 +608,9 @@ directory."
 (use-package string-inflection)
 
 ;;; Center text
-;; (use-package olivetti
-;;   :custom
-;;   (olivetti-body-width (* fill-column 2)))
+(use-package olivetti
+  :custom
+  (olivetti-body-width (* fill-column 2)))
 ;; (use-package centered-window
 ;;   :ensure t
 ;;   :config
@@ -614,7 +626,11 @@ directory."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(compilation-scroll-output t)
+ '(eglot-autoshutdown t)
  '(eglot-confirm-server-initiated-edits nil)
+ '(eglot-events-buffer-size 0)
+ '(eglot-sync-connect 0)
+ '(helm-move-to-line-cycle-in-source nil)
  '(markdown-command william-bruschi/markdown-command)
  '(recentf-max-saved-items 500)
  '(safe-local-variable-values
