@@ -521,6 +521,16 @@ directory."
                                 (substitute-in-file-name "$HOME/"))))
     (william-bruschi/vterm-open current-directory)))
 
+(defun william-bruschi/vterm-home ()
+  "Opens vterm in a new buffer with the current directory set to the
+user's home directory. Names the buffer vterm-home."
+  (interactive)
+  (let ((buffer-name "vterm-home"))
+    (if (get-buffer buffer-name)
+        (switch-to-buffer buffer-name)
+      (let ((default-directory "~/"))
+        (vterm buffer-name)))))
+
 (defun william-bruschi/vterm-vc-root ()
   "Opens vterm in a new buffer in the root vc directory"
   (interactive)
