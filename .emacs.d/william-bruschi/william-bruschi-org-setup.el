@@ -30,4 +30,9 @@
       '((nil . (:level . 1))
         (org-agenda-files :level . 1)))
 
+;; active Babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((shell . t)))
+
 (provide 'william-bruschi-org-setup)
