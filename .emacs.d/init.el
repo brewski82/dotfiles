@@ -559,13 +559,31 @@ directory."
     ;; See https://stackoverflow.com/questions/51275228/avoid-accidental-execution-in-comint-mode
     (compilation-start (concat "bash -i -c \"" command "\"") nil)))
 
+(defun william-bruschi/magit-diff-get-line-number ()
+  "Get the line number of the current diff hunk in Magit."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (let ((line-number 0))
+      (while (and (not (eobp)) (not (bobp)) (eq line-number 0))
+        (when (looking-at "^@@ -[0-9]+,[0-9]+ \\+\\([0-9]+\\),[0-9]+ @@")
+          (setq line-number (string-to-number (match-string 1))))
+        (previous-line 1))
+      line-number)))
+
 (defun william-bruschi/open-in-intellij ()
   "Opens the current file in intellij. Requires the idea shell
 script file to be on PATH."
   (interactive)
-  (start-process "emacs-open-in-intellij" nil
-                 "idea" "--line" (number-to-string (line-number-at-pos))
-                 (buffer-file-name)))
+  (if (buffer-file-name)
+      (start-process "emacs-open-in-intellij" nil
+                     "idea" "--line" (number-to-string (line-number-at-pos))
+                     (buffer-file-name))
+    (start-process "emacs-open-in-intellij" nil
+                   "idea" "--line" (number-to-string
+                                    (william-bruschi/magit-diff-get-line-number))
+                   (magit-file-at-point))))
+
+
 
 ;;; Recent files
 (recentf-mode 1)
