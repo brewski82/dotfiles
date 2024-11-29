@@ -158,11 +158,22 @@
       (concat dired-omit-files "\\|^\\..+$\\|\\.lx32fsl"))
 (setq dired-listing-switches "-alh")
 
-;;; Spell checking
+(use-package visual-fill-column
+  :custom
+  (visual-fill-column-center-text t)
+  (visual-fill-column-enable-sensible-window-split t)
+  (visual-fill-column-adjust-for-text-scale))
+
+(use-package adaptive-wrap)
+
+
 (dolist (hook '(text-mode-hook org-mode-hook))
   (add-hook hook (lambda ()
                    (flyspell-mode 1)
                    (auto-fill-mode 0)
+                   (visual-line-mode 1)
+                   (visual-line-fill-column-mode 1)
+                   (adaptive-wrap-prefix-mode t)
 		   (local-set-key (kbd "C-'") 'other-window)
                    (local-set-key (kbd "M-p") 'org-mark-ring-goto))))
 
@@ -658,6 +669,8 @@ script file to be on PATH."
  '(eglot-confirm-server-initiated-edits nil)
  '(eglot-events-buffer-size 0)
  '(eglot-sync-connect 0)
+ '(fill-column 80)
+ '(helm-M-x-show-short-doc t)
  '(helm-move-to-line-cycle-in-source nil)
  '(markdown-command william-bruschi/markdown-command)
  '(recentf-max-saved-items 500)
@@ -761,6 +774,11 @@ script file to be on PATH."
 ;;; https://stackoverflow.com/a/71785402q
 (use-package ansi-color
   :hook (compilation-filter . ansi-color-compilation-filter))
+
+;;; AI
+(use-package gptel
+  :custom (gptel-org-branching-context t)
+  :bind (("C-c g" . gptel-menu)))
 
 ;;; Typescript and JS config
 (require 'william-bruschi-javascript nil nil)
