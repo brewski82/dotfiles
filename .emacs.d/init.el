@@ -100,6 +100,8 @@
 (use-package magit
   :ensure t
   :bind (("C-x g" . magit-status)))
+(use-package forge
+  :after magit)
 
 ;;; eslint
 (require 'compile-eslint)
@@ -172,7 +174,6 @@
                    (flyspell-mode 1)
                    (auto-fill-mode 0)
                    (visual-line-mode 1)
-                   (visual-line-fill-column-mode 1)
                    (adaptive-wrap-prefix-mode t)
 		   (local-set-key (kbd "C-'") 'other-window)
                    (local-set-key (kbd "M-p") 'org-mark-ring-goto))))
@@ -671,8 +672,10 @@ script file to be on PATH."
  '(eglot-sync-connect 0)
  '(fill-column 80)
  '(helm-M-x-show-short-doc t)
+ '(helm-company-initialize-pattern-with-prefix t)
  '(helm-move-to-line-cycle-in-source nil)
  '(markdown-command william-bruschi/markdown-command)
+ '(org-hide-emphasis-markers t)
  '(recentf-max-saved-items 500)
  '(safe-local-variable-values
    '((william-bruschi/prettier . "npm run prettier")
@@ -698,29 +701,29 @@ script file to be on PATH."
 (use-package all-the-icons
   :if (display-graphic-p))
 
-(use-package material-theme
-  :ensure t
-  :config
-  (load-theme 'material t))
+;; (use-package material-theme
+;;   :ensure t
+;;   :config
+;;   (load-theme 'material t))
 
 ;;; https://github.com/xenodium/dotsies/blob/main/emacs/features/fe-ui.el
-(set-face-attribute 'default nil
-                    :stipple nil
-                    :background "#212121"
-                    :foreground "#eeffff"
-                    :inverse-video nil
-                    ;; :family "Menlo" ;; or Meslo if unavailable: https://github.com/andreberg/Meslo-Font
-                    ;; :family "Hack" ;; brew tap homebrew/cask-fonts && brew cask install font-hack
-                    :family "JetBrains Mono" ;; brew tap homebrew/cask-fonts && brew install --cask font-jetbrains-mono
-                    ;; :family "mononoki" ;; https://madmalik.github.io/mononoki/ or sudo apt-get install fonts-mononoki
-                    :box nil
-                    :strike-through nil
-                    :overline nil
-                    :underline nil
-                    :slant 'normal
-                    :weight 'normal
-                    :width 'normal
-                    :foundry "nil")
+;; (set-face-attribute 'default nil
+;;                     :stipple nil
+;;                     :background "#212121"
+;;                     :foreground "#eeffff"
+;;                     :inverse-video nil
+;;                     ;; :family "Menlo" ;; or Meslo if unavailable: https://github.com/andreberg/Meslo-Font
+;;                     ;; :family "Hack" ;; brew tap homebrew/cask-fonts && brew cask install font-hack
+;;                     :family "JetBrains Mono" ;; brew tap homebrew/cask-fonts && brew install --cask font-jetbrains-mono
+;;                     ;; :family "mononoki" ;; https://madmalik.github.io/mononoki/ or sudo apt-get install fonts-mononoki
+;;                     :box nil
+;;                     :strike-through nil
+;;                     :overline nil
+;;                     :underline nil
+;;                     :slant 'normal
+;;                     :weight 'normal
+;;                     :width 'normal
+;;                     :foundry "nil")
 
 
 ;; (straight-use-package
@@ -761,6 +764,13 @@ script file to be on PATH."
 ;;   :config
 ;;   (solaire-global-mode +1))
 
+(straight-use-package
+  '(nano :type git :host github :repo "rougier/nano-emacs"))
+
+(require 'nano)
+(require 'nano-theme-dark)
+(nano-toggle-theme)
+
 (electric-pair-mode 1)
 
 ;;; Highlight the line your are on.
@@ -778,7 +788,11 @@ script file to be on PATH."
 ;;; AI
 (use-package gptel
   :custom (gptel-org-branching-context t)
-  :bind (("C-c g" . gptel-menu)))
+  :bind (("C-c g" . gptel-menu))
+  :config
+  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
+  (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n"))
+
 
 ;;; Typescript and JS config
 (require 'william-bruschi-javascript nil nil)
