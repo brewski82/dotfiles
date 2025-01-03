@@ -16,7 +16,8 @@
 
 (dolist (hook '(org-mode-hook))
   (add-hook hook (lambda ()
-		   (local-set-key (kbd "C-c t") 'org-time-stamp-inactive))))
+                   (local-set-key (kbd "C-c t") 'org-time-stamp-inactive)
+                   (local-set-key (kbd "M-<return>") 'org-insert-item))))
 
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline "" "Tasks")
