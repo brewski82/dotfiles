@@ -216,9 +216,6 @@
 ;; Copy paste between apps
 (setq x-select-enable-clipboard t)
 
-;; Disable toolbar mode
-(tool-bar-mode 0)
-
 (put 'downcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
@@ -726,50 +723,27 @@ script file to be on PATH."
 ;;                     :foundry "nil")
 
 
-;; (straight-use-package
-;;  '(nano-emacs :type git :host github :repo "rougier/nano-emacs"))
-
-;; (require 'nano)
-;; (nano-theme-set-dark)
-;; (nano-theme)
-;; (use-package doom-themes
-;;   :ensure t
-;;   :config
-;;   ;; Global settings (defaults)
-;;   (setq doom-themes-enable-bold t      ; if nil, bold is universally disabled
-;;         doom-themes-enable-italic t)   ; if nil, italics is universally disabled
-;;   (load-theme 'doom-vibrant t)
-;;   ;; (load-theme 'doom-xcode t)
-;;   ;; (load-theme 'doom-old-hope t)
-;;   ;; (load-theme 'doom-oceanic-next t)
-;;   ;; (load-theme 'doom-monokai-pro t)
-;;   ;; (load-theme 'doom-monokai-spectrum t)
-
-;;   (setq doom-monokai-pro-padded-modeline t)
-
-;;   ;; (setq doom-vibrant-brighter-modeline t
-;;   ;;       doom-vibrant-brighter-comments t)
-
-;;   ;; Enable flashing mode-line on errors
-;;   (doom-themes-visual-bell-config)
-;;   ;; Enable custom neotree theme (all-the-icons must be installed!)
-;;   ;; (doom-themes-neotree-config)
-;;   ;; or for treemacs users
-;;   ;; (setq doom-themes-treemacs-theme "doom-colors")
-;;   ;; (doom-themes-treemacs-config)
-;;   ;; Corrects (and improves) org-mode's native fontification.
-;;   (doom-themes-org-config))
-
-;; (use-package solaire-mode
-;;   :config
-;;   (solaire-global-mode +1))
-
+;;; https://github.com/rougier/nano-emacs
+;;; https://randomgeekery.org/config/emacs/nano/
 (straight-use-package
   '(nano :type git :host github :repo "rougier/nano-emacs"))
-
-(require 'nano)
+(require 'nano-layout)
+(require 'nano-base-colors)
+(require 'nano-faces)
+(nano-faces)
+(set-face-attribute 'nano-face-strong nil
+                    :foreground (face-foreground 'nano-face-default)
+                    :weight 'bold)
+(require 'nano-theme)
 (require 'nano-theme-dark)
-(nano-toggle-theme)
+(nano-theme-set-dark)
+(nano-theme)
+(set-face-attribute 'bold nil :weight 'bold)
+(require 'nano-modeline)
+(call-interactively 'nano-refresh-theme)
+
+;; Disable toolbar mode
+(tool-bar-mode 0)
 
 (electric-pair-mode 1)
 
