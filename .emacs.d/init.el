@@ -18,26 +18,175 @@
 (push "~/.emacs.d/william-bruschi" load-path)
 (require 'william-bruschi-init-pre nil nil)
 
-;;; Helm
-(use-package helm
-  :bind (("M-x" . helm-M-x)
-         ("C-x C-f" . helm-find-files)
-         ("C-x r b" . helm-filtered-bookmarks)
-         ("C-x b" . helm-buffers-list)
-         ("M-s o" . helm-occur))
-  :config (helm-mode 1)
+;; Example configuration for Consult
+(use-package consult
+  ;; Replace bindings. Lazily loaded by `use-package'.
+  :bind (;; C-c bindings in `mode-specific-map'
+         ("C-c M-x" . consult-mode-command)
+         ("C-c h" . consult-history)
+         ("C-c k" . consult-kmacro)
+         ("C-c m" . consult-man)
+         ("C-c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x bindings in `ctl-x-map'
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ;; ("M-'" . consult-register-store)
+         ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ;; M-g bindings in `goto-map'
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings in `search-map'
+         ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+         ("M-s c" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  :init
+
+  ;; Tweak the register preview for `consult-register-load',
+  ;; `consult-register-store' and the built-in commands.  This improves the
+  ;; register formatting, adds thin separator lines, register sorting and hides
+  ;; the window mode line.
+  (advice-add #'register-preview :override #'consult-register-window)
+  (setq register-preview-delay 0.5)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key "M-.")
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  (consult-customize
+   consult-theme :preview-key '(:debounce 0.2 any)
+   consult-ripgrep consult-git-grep consult-grep consult-man
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-bookmark consult--source-file-register
+   consult--source-recent-file consult--source-project-recent-file
+   ;; :preview-key "M-."
+   :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; "C-+"
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+  )
+
+;; Enable Vertico.
+(use-package vertico
+  ;; :custom
+  ;; (vertico-scroll-margin 0) ;; Different scroll margin
+  ;; (vertico-count 20) ;; Show more candidates
+  ;; (vertico-resize t) ;; Grow and shrink the Vertico minibuffer
+  ;; (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
+  :init
+  (vertico-mode))
+
+;; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+  :init
+  (savehist-mode))
+
+;; Enable rich annotations using the Marginalia package
+(use-package marginalia
+  ;; Bind `marginalia-cycle' locally in the minibuffer.  To make the binding
+  ;; available in the *Completions* buffer, add it to the
+  ;; `completion-list-mode-map'.
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+
+  ;; The :init section is always executed.
+  :init
+
+  ;; Marginalia must be activated in the :init section of use-package such that
+  ;; the mode gets enabled right away. Note that this forces loading the
+  ;; package.
+  (marginalia-mode))
+
+(use-package orderless
+  :ensure t
   :custom
-  (helm-completion-style 'emacs)
-  (helm-buffer-max-length 60))
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+
+
+;; (use-package hotfuzz
+;;     :custom
+;;     (completion-styles '(hotfuzz basic)))
+
+;;; Helm
+;; (use-package helm
+;;   :bind (("M-x" . helm-M-x)
+;;          ("C-x C-f" . helm-find-files)
+;;          ("C-x r b" . helm-filtered-bookmarks)
+;;          ("C-x b" . helm-buffers-list)
+;;          ("M-s o" . helm-occur))
+;;   :config (helm-mode 1)
+;;   :custom
+;;   (helm-completion-style 'emacs)
+;;   (helm-buffer-max-length 60)
+;;   (helm-company-initialize-pattern-with-prefix t)
+;;   (helm-move-to-line-cycle-in-source nil)
+;;   (helm-M-x-show-short-doc t))
 
 ;;; Helm buffer ordering per
 ;;; http://snowsyn.net/2018/10/21/buffer-ordering-with-helm/ and
 ;;; https://github.com/emacs-helm/helm/issues/1492
-(defun nm-around-helm-buffers-sort-transformer (candidates source)
-  candidates)
+;; (defun nm-around-helm-buffers-sort-transformer (candidates source)
+;;   candidates)
 
-(advice-add 'helm-buffers-sort-transformer
-            :override #'nm-around-helm-buffers-sort-transformer)
+;; (advice-add 'helm-buffers-sort-transformer
+;;             :override #'nm-around-helm-buffers-sort-transformer)
 
 (require 'cl-lib)
 
@@ -667,12 +816,14 @@ script file to be on PATH."
  '(eglot-confirm-server-initiated-edits nil)
  '(eglot-events-buffer-size 0)
  '(eglot-sync-connect 0)
+ '(enable-recursive-minibuffers t)
  '(fill-column 80)
- '(helm-M-x-show-short-doc t)
- '(helm-company-initialize-pattern-with-prefix t)
- '(helm-move-to-line-cycle-in-source nil)
  '(markdown-command william-bruschi/markdown-command)
+ '(minibuffer-prompt-properties '(read-only t cursor-intangible t face minibuffer-prompt))
  '(org-hide-emphasis-markers t)
+ '(read-buffer-completion-ignore-case t)
+ `(completion-ignore-case t)
+ '(read-extended-command-predicate #'command-completion-default-include-p)
  '(recentf-max-saved-items 500)
  '(safe-local-variable-values
    '((william-bruschi/prettier . "npm run prettier")
@@ -759,16 +910,44 @@ script file to be on PATH."
 (use-package ansi-color
   :hook (compilation-filter . ansi-color-compilation-filter))
 
+(require 'auth-source)
+
 ;;; AI
+(defun get-gemini-password ()
+  (funcall (plist-get
+            (car (auth-source-search :host "gemini.google" :service "apikey")) :secret)))
+
+(defun get-openai-password ()
+  (funcall (plist-get
+            (car (auth-source-search :host "api.openai.com" :service "apikey")) :secret)))
+
+(defun get-anthropic-password ()
+  (funcall (plist-get
+            (car (auth-source-search :host "anthropic" :service "apikey")) :secret)))
+
 (use-package gptel
   :custom (gptel-org-branching-context t)
   :bind (("C-c g" . gptel-menu))
   :config
   (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
-  (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n"))
+  (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
+  (gptel-make-gemini "Gemini" :key 'get-gemini-password :stream t)
+  (gptel-make-anthropic "Claude" :stream t :key 'get-anthropic-password))
 
+(use-package aidermacs
+  :straight (:host github :repo "MatthewZMD/aidermacs" :files ("*.el"))
+  :config
+  (global-set-key (kbd "C-c a") 'aidermacs-transient-menu)
+  ; See the Configuration section below
+  (setq aidermacs-auto-commits t)
+  (setq aidermacs-use-architect-mode t)
+  (setq aidermacs-backend 'vterm))
 
 ;;; Typescript and JS config
 (require 'william-bruschi-javascript nil nil)
 
 (require 'william-bruschi-init-post nil t)
+
+(use-package math-preview)
+
+(menu-bar-mode 1)
