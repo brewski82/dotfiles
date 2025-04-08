@@ -12,7 +12,7 @@
 ;; (setf (nth 4 org-emphasis-regexp-components) 10)
 
 (setq org-default-notes-file "~/Documents/org/notes.org")
-(global-set-key (kbd "C-c c") #'org-capture)
+(global-set-key (kbd "C-c o") #'org-capture)
 
 (dolist (hook '(org-mode-hook))
   (add-hook hook (lambda ()
