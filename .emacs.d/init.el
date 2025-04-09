@@ -268,7 +268,20 @@
   (beacon-blink-when-focused t)
   (beacon-color .2)
   (beacon-mode t)
-  (beacon-size 120))
+  (beacon-size 120)
+  (beacon-dont-blink-major-modes '(t
+                                   magit-status-mode
+                                   magit-popup-mode
+                                   inf-ruby-mode
+                                   mu4e-headers-mode
+                                   gnus-summary-mode
+                                   gnus-group-mode
+                                   term-mode
+                                   eshell-mode
+                                   shell-mode
+                                   comint-mode
+                                   vterm-mode
+                                   eat-mode)))
 
 ;;; Buffer settings
 (require 'uniquify)
