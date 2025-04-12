@@ -965,6 +965,12 @@ script file to be on PATH."
   :config
   (claude-code-mode))
 
+;;; For EAT terminal
+(set-face-attribute 'nobreak-space nil :underline nil)
+(setq
+ eat-minimum-latency 0.035
+ eat-maximum-latency 0.05)
+
 ;;; Typescript and JS config
 (require 'william-bruschi-javascript nil nil)
 
