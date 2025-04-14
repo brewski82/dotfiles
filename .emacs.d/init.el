@@ -363,7 +363,8 @@
 
 ;;; vterm https://github.com/akermu/emacs-libvterm
 (use-package vterm
-  :config (setq vterm-max-scrollback 10000))
+  :config
+  (setq vterm-max-scrollback 10000))
 
 ;;; Scroll bar
 (use-package sml-modeline
@@ -825,6 +826,7 @@ script file to be on PATH."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(compilation-scroll-output t)
+ '(completion-ignore-case t t)
  '(eglot-autoshutdown t)
  '(eglot-confirm-server-initiated-edits nil)
  '(eglot-events-buffer-size 0)
@@ -835,7 +837,6 @@ script file to be on PATH."
  '(minibuffer-prompt-properties '(read-only t cursor-intangible t face minibuffer-prompt))
  '(org-hide-emphasis-markers t)
  '(read-buffer-completion-ignore-case t)
- `(completion-ignore-case t)
  '(read-extended-command-predicate #'command-completion-default-include-p)
  '(recentf-max-saved-items 500)
  '(safe-local-variable-values
@@ -848,7 +849,7 @@ script file to be on PATH."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(eat-term-font-0 ((t (:family "JetBrains Mono")))))
 
 ;;; Global Key bindings
 (global-set-key (kbd "C-'") 'other-window)
@@ -912,11 +913,8 @@ script file to be on PATH."
 (electric-pair-mode 1)
 
 ;;; Highlight the line your are on.
-(global-hl-line-mode 1)
-(set-face-background 'hl-line "gray15")
-(set-face-background 'hl-line "gray25")
-(set-face-background 'hl-line "gray30")
-(set-face-background 'hl-line "black")
+(add-hook 'prog-mode-hook #'hl-line-mode)
+(add-hook 'text-mode-hook #'hl-line-mode)
 
 ;;; Support color in compilation mode. See
 ;;; https://stackoverflow.com/a/71785402q
@@ -956,6 +954,20 @@ script file to be on PATH."
   (setq aidermacs-use-architect-mode t)
   (setq aidermacs-backend 'vterm))
 
+(straight-use-package
+ '(eat :type git
+       :host codeberg
+       :repo "akib/emacs-eat"
+       :files ("*.el" ("term" "term/*.el") "*.texi"
+               "*.ti" ("terminfo/e" "terminfo/e/*")
+               ("terminfo/65" "terminfo/65/*")
+               ("integration" "integration/*")
+               (:exclude ".dir-locals.el" "*-tests.el")))
+ :config
+ (setq eat-term-nam "eat-truecolor"
+       eat-minimum-latency 0.035
+       eat-maximum-latency 0.05))
+
 (use-package claude-code
   :straight (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main"
                    :files ("*.el" (:exclude "demo.gif")))
@@ -967,9 +979,7 @@ script file to be on PATH."
 
 ;;; For EAT terminal
 (set-face-attribute 'nobreak-space nil :underline nil)
-(setq
- eat-minimum-latency 0.035
- eat-maximum-latency 0.05)
+
 
 ;;; Typescript and JS config
 (require 'william-bruschi-javascript nil nil)
