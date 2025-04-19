@@ -363,8 +363,12 @@
 
 ;;; vterm https://github.com/akermu/emacs-libvterm
 (use-package vterm
-  :config
-  (setq vterm-max-scrollback 10000))
+  :custom
+  (vterm-max-scrollback 10000)
+  :hook (vterm-mode . (lambda ()
+                        (setq buffer-face-mode-face '(:family "JuliaMono"))
+                        (buffer-face-mode))))
+
 
 ;;; Scroll bar
 (use-package sml-modeline
@@ -890,22 +894,32 @@ script file to be on PATH."
 
 ;;; https://github.com/rougier/nano-emacs
 ;;; https://randomgeekery.org/config/emacs/nano/
-(straight-use-package
-  '(nano :type git :host github :repo "rougier/nano-emacs"))
-(require 'nano-layout)
-(require 'nano-base-colors)
-(require 'nano-faces)
-(nano-faces)
-(set-face-attribute 'nano-face-strong nil
-                    :foreground (face-foreground 'nano-face-default)
-                    :weight 'bold)
-(require 'nano-theme)
-(require 'nano-theme-dark)
-(nano-theme-set-dark)
-(nano-theme)
-(set-face-attribute 'bold nil :weight 'bold)
-(require 'nano-modeline)
-(call-interactively 'nano-refresh-theme)
+;; (straight-use-package
+;;   '(nano :type git :host github :repo "rougier/nano-emacs"))
+;; (require 'nano-layout)
+;; (require 'nano-base-colors)
+;; (require 'nano-faces)
+;; (nano-faces)
+;; (set-face-attribute 'nano-face-strong nil
+;;                     :foreground (face-foreground 'nano-face-default)
+;;                     :weight 'bold)
+;; (require 'nano-theme)
+;; (require 'nano-theme-dark)
+;; (nano-theme-set-dark)
+;; (nano-theme)
+;; (set-face-attribute 'bold nil :weight 'bold)
+;; (require 'nano-modeline)
+;; (call-interactively 'nano-refresh-theme)
+
+(use-package spacemacs-theme
+  :ensure t
+  :config
+  (load-theme 'spacemacs-dark t)
+  :custom
+  (spacemacs-theme-org-agenda-height t)
+  (spacemacs-theme-org-highlight t)
+  (spacemacs-theme-underline-parens nil))
+
 
 ;; Disable toolbar mode
 (tool-bar-mode 0)
