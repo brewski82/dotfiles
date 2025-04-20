@@ -1,10 +1,26 @@
+(defvar-local william-bruschi/claude-code-buffer-name-local nil
+  "Buffer-local variable to store the claude code buffer name.")
+
 (defun william-bruschi/claude-code-buffer-name (vc-root-directory)
-  "The name of the claude code buffer, based on the project's root directory."
-  (concat "claude-" (william-bruschi/vterm-buffer-name-suffix vc-root-directory)))
+  "The name of the claude code buffer, based on the project's root directory.
+Checks for a buffer-local variable first."
+  (or william-bruschi/claude-code-buffer-name-local
+      (concat "claude-" (william-bruschi/vterm-buffer-name-suffix vc-root-directory))))
+
+(defun william-bruschi/set-claude-code-buffer-name ()
+  "Interactive function to set the buffer-local claude code buffer
+name from a list of buffers."
+  (interactive)
+  (let* ((buffers (mapcar 'buffer-name (buffer-list)))
+         (selected-buffer (completing-read "Select buffer: " buffers)))
+    (setq william-bruschi/claude-code-buffer-name-local selected-buffer)
+    (message "Set claude code buffer name to: %s" selected-buffer)))
 
 (defun william-bruschi/current-claude-code-buffer-name ()
-  "Get the current claude code buffer name based on project root."
-  (william-bruschi/claude-code-buffer-name (project-root (project-current))))
+  "Get the current claude code buffer name based on project root or
+the buffer local variable."
+  (or william-bruschi/claude-code-buffer-name-local
+      (william-bruschi/claude-code-buffer-name (project-root (project-current)))))
 
 (defun william-bruschi/claude-code-vterm ()
   "Opens or switches to a claude code session for the current project."
@@ -38,7 +54,7 @@
   (let* ((user-message (read-string "Enter message: "))
          (buffer (william-bruschi/current-claude-code-buffer-name))
          (buffer-contents (buffer-string))
-         (message (concat buffer-contents "\n\n" message)))
+         (message (concat buffer-contents "\n\n" user-message)))
     (william-bruschi/send-message-to-claude message)))
 
 (defun william-bruschi/send-to-claude-with-region ()
@@ -75,7 +91,8 @@ the file name and line number to claude along with a user message."
      ("r" "with region" william-bruschi/send-to-claude-with-region)
      ("c" "with context" william-bruschi/send-message-to-claude-with-context)]
    [ "Session"
-     ("o" "open session" william-bruschi/claude-code-vterm)]])
+     ("O" "open session" william-bruschi/claude-code-vterm)
+     ("S" "select session" william-bruschi/set-claude-code-buffer-name)]])
 
 (defun william-bruschi/run-claude-code-menu ()
   (interactive)
