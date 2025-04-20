@@ -455,7 +455,9 @@
     (exec-path-from-shell-initialize)))
 
 (use-package isend-mode
-  :config (setq isend-forward-line nil))
+  :custom
+  (isend-forward-line t)
+  (isend-end-with-empty-line t))
 
 (use-package markdown-mode)
 
@@ -679,14 +681,18 @@ the heirarchy outside the vc root."
   (other-window 2)
   (balance-windows))
 
+(defun william-bruschi/vterm-buffer-name-suffix (directory)
+  (file-name-nondirectory
+   (directory-file-name (file-name-directory directory))))
+
 (defun william-bruschi/vterm-open (directory)
-  (let* ((buffer-name-suffix
-          (file-name-nondirectory
-           (directory-file-name (file-name-directory directory))))
-         (vterm-buffer-name (concat "vterm-" buffer-name-suffix))
+  (let* ((vterm-buffer-name
+          (concat "vterm-"
+                  (william-bruschi/vterm-buffer-name-suffix directory)))
          (default-directory directory)
          (vterm-buffer (vterm t)))
-    (rename-buffer vterm-buffer-name)))
+    (rename-buffer vterm-buffer-name)
+    vterm-buffer-name))
 
 (defun william-bruschi/vterm-current-dir ()
   "Opens vterm in a new buffer with a new based on the current
@@ -710,7 +716,7 @@ user's home directory. Names the buffer vterm-home."
 (defun william-bruschi/vterm-vc-root ()
   "Opens vterm in a new buffer in the root vc directory"
   (interactive)
-  (let* ((current-directory (or (vc-root-dir))))
+  (let* ((current-directory (project-root (project-current))))
     (unless current-directory
       (error "vc root not found"))
     (william-bruschi/vterm-open current-directory)))
@@ -758,8 +764,6 @@ script file to be on PATH."
                    "idea" "--line" (number-to-string
                                     (william-bruschi/magit-diff-get-line-number))
                    (magit-file-at-point))))
-
-
 
 ;;; Recent files
 (recentf-mode 1)
@@ -848,12 +852,6 @@ script file to be on PATH."
      (william-bruschi/prettier . "npx prettier --write")
      (william-bruschi/prettier . "npx prettier")
      (william-bruschi/eslint . "npx eslint"))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(eat-term-font-0 ((t (:family "JetBrains Mono")))))
 
 ;;; Global Key bindings
 (global-set-key (kbd "C-'") 'other-window)
@@ -968,32 +966,7 @@ script file to be on PATH."
   (setq aidermacs-use-architect-mode t)
   (setq aidermacs-backend 'vterm))
 
-(straight-use-package
- '(eat :type git
-       :host codeberg
-       :repo "akib/emacs-eat"
-       :files ("*.el" ("term" "term/*.el") "*.texi"
-               "*.ti" ("terminfo/e" "terminfo/e/*")
-               ("terminfo/65" "terminfo/65/*")
-               ("integration" "integration/*")
-               (:exclude ".dir-locals.el" "*-tests.el")))
- :config
- (setq eat-term-nam "eat-truecolor"
-       eat-minimum-latency 0.035
-       eat-maximum-latency 0.05))
-
-(use-package claude-code
-  :straight (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main"
-                   :files ("*.el" (:exclude "demo.gif")))
-  :bind-keymap
-  ("C-c c" . claude-code-command-map)
-  :hook ((claude-code--start . sm-setup-claude-faces))
-  :config
-  (claude-code-mode))
-
-;;; For EAT terminal
-(set-face-attribute 'nobreak-space nil :underline nil)
-
+(require 'william-bruschi-ai-tools)
 
 ;;; Typescript and JS config
 (require 'william-bruschi-javascript nil nil)
