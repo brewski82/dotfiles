@@ -365,6 +365,7 @@
 (use-package vterm
   :custom
   (vterm-max-scrollback 10000)
+  (vterm-always-compile-module t)
   :hook (vterm-mode . (lambda ()
                         (setq buffer-face-mode-face '(:family "JuliaMono"))
                         (buffer-face-mode))))
@@ -976,3 +977,9 @@ script file to be on PATH."
 (use-package math-preview)
 
 (menu-bar-mode 1)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

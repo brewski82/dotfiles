@@ -28,9 +28,10 @@ the buffer local variable."
   (let ((claude-buffer (william-bruschi/current-claude-code-buffer-name)))
     (if (get-buffer claude-buffer)
         (switch-to-buffer claude-buffer)  ; Switch to existing buffer
-      (let ((buffer (william-bruschi/vterm-vc-root)))
+      (let* ((project-directory (project-root (project-current)))
+             (default-directory project-directory)
+             (buffer (vterm claude-buffer)))
         (with-current-buffer buffer
-          (rename-buffer claude-buffer)
           (vterm-insert "claude")
           (vterm-send-return))))))
 
