@@ -991,5 +991,5 @@ script file to be on PATH."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(fringe ((t (:background "light green"))))
- '(mode-line ((t (:background "dim gray" :foreground "white"))))
- '(mode-line-inactive ((t (:background nil)))))
+ '(mode-line ((t (:background nil))))
+ '(mode-line-inactive ((t (:background "dim gray" :foreground "white")))))
