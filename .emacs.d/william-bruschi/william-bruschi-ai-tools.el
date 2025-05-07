@@ -93,7 +93,11 @@ the file name and line number to claude along with a user message."
      ("c" "with context" william-bruschi/send-message-to-claude-with-context)]
    [ "Session"
      ("O" "open session" william-bruschi/claude-code-vterm)
-     ("S" "select session" william-bruschi/set-claude-code-buffer-name)]])
+     ("S" "select session" william-bruschi/set-claude-code-buffer-name)
+     ("W" "in new worktree" (lambda ()
+                              (interactive)
+                              (call-interactively 'magit-worktree-branch)
+                              (william-bruschi/claude-code-vterm)))]])
 
 (defun william-bruschi/run-claude-code-menu ()
   (interactive)
