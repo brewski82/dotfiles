@@ -929,6 +929,11 @@ script file to be on PATH."
 (add-hook 'prog-mode-hook #'hl-line-mode)
 (add-hook 'text-mode-hook #'hl-line-mode)
 
+;;; https://github.com/mina86/auto-dim-other-buffers.el
+(use-package auto-dim-other-buffers
+  :config (auto-dim-other-buffers-mode 1)
+  :custom-face (auto-dim-other-buffers ((t (:background "gray27")))))
+
 ;;; Support color in compilation mode. See
 ;;; https://stackoverflow.com/a/71785402q
 (use-package ansi-color
@@ -977,9 +982,3 @@ script file to be on PATH."
 (use-package math-preview)
 
 (menu-bar-mode 1)
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
