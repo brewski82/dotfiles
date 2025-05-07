@@ -982,3 +982,7 @@ script file to be on PATH."
 (use-package math-preview)
 
 (menu-bar-mode 1)
+
+(custom-set-faces
+ '(mode-line ((t (:background nil))))
+ '(mode-line-inactive ((t (:background "dim gray" :foreground "white")))))
