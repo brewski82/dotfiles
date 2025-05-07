@@ -834,6 +834,7 @@ script file to be on PATH."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auto-dim-other-buffers-mode t)
  '(compilation-scroll-output t)
  '(completion-ignore-case t t)
  '(eglot-autoshutdown t)
@@ -842,6 +843,7 @@ script file to be on PATH."
  '(eglot-sync-connect 0)
  '(enable-recursive-minibuffers t)
  '(fill-column 80)
+ '(fringe-mode '(4 . 4) nil (fringe))
  '(markdown-command william-bruschi/markdown-command)
  '(minibuffer-prompt-properties '(read-only t cursor-intangible t face minibuffer-prompt))
  '(org-hide-emphasis-markers t)
@@ -984,5 +986,10 @@ script file to be on PATH."
 (menu-bar-mode 1)
 
 (custom-set-faces
- '(mode-line ((t (:background nil))))
- '(mode-line-inactive ((t (:background "dim gray" :foreground "white")))))
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(fringe ((t (:background "light green"))))
+ '(mode-line ((t (:background "dim gray" :foreground "white"))))
+ '(mode-line-inactive ((t (:background nil)))))
