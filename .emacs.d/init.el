@@ -363,6 +363,9 @@
 
 ;;; vterm https://github.com/akermu/emacs-libvterm
 (use-package vterm
+  :config (setq vterm-timer-delay nil)
+  ;; https://github.com/akermu/emacs-libvterm/issues/765
+  :config (define-key vterm-mode-map [return] nil t)
   :custom
   (vterm-max-scrollback 10000)
   (vterm-always-compile-module t)
@@ -746,12 +749,14 @@ directory."
   "Get the line number of the current diff hunk in Magit."
   (save-excursion
     (move-beginning-of-line 1)
-    (let ((line-number 0))
+    (let ((line-number 0)
+          (line-count 0))
       (while (and (not (eobp)) (not (bobp)) (eq line-number 0))
-        (when (looking-at "^@@ -[0-9]+,[0-9]+ \\+\\([0-9]+\\),[0-9]+ @@")
-          (setq line-number (string-to-number (match-string 1))))
+        (when (looking-at "^@@ -[0-9]+,[0-9]+ \\+\\([0-9]+\\),\\([0-9]+\\) @@")
+          (setq line-number (string-to-number (match-string 1))
+                line-count (string-to-number (match-string 2))))
         (previous-line 1))
-      line-number)))
+      (cons line-number line-count))))
 
 (defun william-bruschi/open-in-intellij ()
   "Opens the current file in intellij. Requires the idea shell
@@ -763,7 +768,7 @@ script file to be on PATH."
                      (buffer-file-name))
     (start-process "emacs-open-in-intellij" nil
                    "idea" "--line" (number-to-string
-                                    (william-bruschi/magit-diff-get-line-number))
+                                    (car (william-bruschi/magit-diff-get-line-number)))
                    (magit-file-at-point))))
 
 ;;; Recent files
