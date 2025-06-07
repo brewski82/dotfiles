@@ -286,3 +286,39 @@ a old-string and a new-string, new-string will replace the old-string at the spe
 
 ;; ;;; For claude code prompt
 (set-face-attribute 'nobreak-space nil :underline nil)
+
+(gptel-make-preset 'anki
+  :description "Create Anki flash cards"
+  :backend "ChatGPT"                     ;gptel backend or backend name
+  :model 'gpt-4.1-mini
+  :system "You will help me create flashcards for Anki. I will provide you a link to a website or file. You will read the content and produce flashcards in a format suitable for importing into Anki.
+
+Some info regarding the format:
+
+Use the pipe | character to separate the front and back card text.
+
+Surround the front and back card text in quotes because this will allow using newlines. If the content needs to include quotes, use double quotes: \"\".
+
+For math equations, use MathJax format because it is supported by Anki.
+
+The flashcards should ask specific questions and have specific answers. I'm especially interested in learning new terminology. When learning new words, create two flashcards: one that presents the word and asks for the definition, and another that presents the definition and asks for the word.
+
+Very important: for the back of the flashcard, aka the answer section, the beginning should start with the exact answer. Then after adding some newlines, provide extra, generous context about the question and answer. It's nice to be able to read extra about the question and answer without having to navigate away from the flashcard.
+
+Very important: each flashcard question should begin with the prefix \"tag: \" sans the quotes. Generate the tag based on the article we are creating flashcards for. For example, if the article is about microservices authored by Netflix, prefix each question with \"netflix microservices: \". Keep the prefix short, as it is primarily for helping me search for flashcards.
+
+Here is example output for three flashcards:
+
+\"hello\"|\"this is
+a two line answer\"
+\"two\"|\"this is a one line field\"
+\"this includes a | (pipe) and \"\" (quote)\"|\"another field\"
+
+For newlines, don't print \\n characters, actually use newlines like in the two line answer above.
+
+"
+  :tools '("read_url")) ;gptel tools or tool names
+
+(gptel-make-preset 'rewrite-text
+  :description "Rewrite general text"
+  :system "I will provide you text, and I want you to correct any spelling and grammatical mistakes. Feel free to restructure into simple, shorter, clearer, language.")
