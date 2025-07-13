@@ -273,14 +273,27 @@ a old-string and a new-string, new-string will replace the old-string at the spe
  :category "edit")
 
 
+;;; claude code config
 
-(use-package claude-code-tools
-  :straight (:type git :host github :repo "brewski82/claude-code-tools.el" :branch "main"
-                   :files ("*.el" (:exclude ".gitignore")))
-  :bind ("C-c c" . claude-code-tools-run-claude-code-menu)
-  ;; :config
-  ;; Optional configuration here
-  )
+(use-package claude-code
+  :straight (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main"
+                   :files ("*.el" (:exclude "images/*")))
+  :bind-keymap
+  ("C-c c" . claude-code-command-map) ;; or your preferred key
+  :config
+  (claude-code-mode)
+  :custom
+  (claude-code-terminal-backend 'vterm)
+  (claude-code-optimize-window-resize nil))
+
+(defun my-claude-notify (title message)
+  "Display a macOS notification with sound."
+  (call-process "osascript" nil nil nil
+                "-e" (format "display notification \"%s\" with title \"%s\" sound name \"Glass\""
+                             message title)))
+
+(setq claude-code-notification-function #'my-claude-notify)
+
 
 (provide 'william-bruschi-ai-tools)
 
