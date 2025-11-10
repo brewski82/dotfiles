@@ -1,3 +1,27 @@
+;;; https://vxlabs.com/2022/06/12/typescript-development-with-emacs-tree-sitter-and-lsp-in-2022/
+(use-package typescript-mode
+  :config
+  ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
+  ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
+  (define-derived-mode typescriptreact-mode typescript-mode
+    "TypeScript TSX")
+
+  ;; use our derived mode for tsx files
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+  ;; by default, typescript-mode is mapped to the treesitter typescript parser
+  ;; use our derived mode to map both .tsx AND .ts -> typescriptreact-mode -> treesitter tsx
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx))
+  :custom (typescript-indent-level 2))
+
+(use-package rjsx-mode)
+(use-package ts-comint)
+(use-package jest-test-mode
+  :hook ((rjsx-mode typescript-mode) . jest-test-mode)
+  :custom
+  (jest-test-command-string "yarn run %s jest %s %s"))
+(use-package prettier)
+
+
 ;;; See https://gist.github.com/abrochard/dd610fc4673593b7cbce7a0176d897de for examples.
 (require 'magit)
 
@@ -174,5 +198,49 @@ spell checker."
 ;;; Sending commands to vterm
 ;; (vterm "my-window")
 ;; (isend--send-dest "echo test" (get-buffer "my-window"))
+
+;;; Javascript
+(with-eval-after-load 'js
+  (define-key js-mode-map (kbd "M-.") nil))
+;;; Default to rjsx mode
+(add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+;; (add-to-list 'auto-mode-alist '("\\.ts\\'" . rjsx-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+
+;;; Run command setup
+(use-package run-command
+  :custom
+  (run-command-default-runner 'run-command-runner-compile)
+  (run-command-recipes '(ignore run-command-recipe-package-json)))
+
+;;; See https://github.com/bard/emacs-run-command/blob/master/examples/run-command-recipe-package-json.el
+;;; Adjusted to search the package file for yarn commands.
+(defun run-command-recipe-package-json--get-scripts (package-json-file)
+  "Extract NPM scripts from `package-json-file'."
+  (with-temp-buffer
+    (insert-file-contents package-json-file)
+    (when-let ((script-hash (gethash "scripts" (json-parse-buffer))))
+      (let ((scripts '())
+            (is-yarn-p (string-match-p "\"yarn\s" (buffer-string))))
+        (maphash (lambda (key _value) (push key scripts)) script-hash)
+        (list scripts is-yarn-p)))))
+
+(defun run-command-recipe-package-json ()
+  (when-let* ((project-dir
+               (locate-dominating-file default-directory "package.json"))
+              (scripts-and-is-yarn-p
+               (run-command-recipe-package-json--get-scripts (concat project-dir "package.json")))
+              (scripts (car scripts-and-is-yarn-p))
+              (script-runner
+               (if (or (cadr scripts-and-is-yarn-p)
+                       (file-exists-p (concat project-dir "yarn.lock")))
+                   "yarn"
+                 "npm")))
+    (mapcar (lambda (script)
+              (list :command-name script
+                    :command-line (concat script-runner " run " script)
+                    :display script
+                    :working-dir project-dir))
+            scripts)))
 
 (provide 'william-bruschi-javascript)

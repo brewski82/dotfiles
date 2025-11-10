@@ -1,6 +1,45 @@
+(require 'auth-source)
+
+;;; AI
+(defun get-gemini-password ()
+  (funcall (plist-get
+            (car (auth-source-search :host "gemini.google" :service "apikey")) :secret)))
+
+(defun get-openai-password ()
+  (funcall (plist-get
+            (car (auth-source-search :host "api.openai.com" :service "apikey")) :secret)))
+
+(defun get-anthropic-password ()
+  (funcall (plist-get
+            (car (auth-source-search :host "anthropic" :service "apikey")) :secret)))
+
+(use-package gptel
+  :custom (gptel-org-branching-context t)
+  :bind (("C-c g" . gptel-menu))
+  :config
+  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
+  (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
+  (gptel-make-gemini "Gemini" :key 'get-gemini-password :stream t)
+  (gptel-make-anthropic "Claude" :stream t :key 'get-anthropic-password))
+
+
+(use-package shell-maker
+  :ensure t)
+
 (use-package mcp-hub
   :straight (:type git :host github :repo "lizqwerscott/mcp.el" :branch "master"
                    :files ("*.el" (:exclude ".gitignore"))))
+
+(use-package acp
+  :straight (:type git :host github :repo "xenodium/acp.el"))
+
+(use-package agent-shell
+  :straight (:type git :host github :repo "xenodium/agent-shell")
+  :custom
+  (agent-shell-file-completion-enabled t))
+
+;;; Agent Shell custom commands
+
 
 (require 'gptel-integrations)
 
@@ -274,25 +313,24 @@ a old-string and a new-string, new-string will replace the old-string at the spe
 
 
 ;;; claude code config
+;; (use-package claude-code
+;;   :straight (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main"
+;;                    :files ("*.el" (:exclude "images/*")))
+;;   :bind-keymap
+;;   ("C-c c" . claude-code-command-map) ;; or your preferred key
+;;   :config
+;;   (claude-code-mode)
+;;   :custom
+;;   (claude-code-terminal-backend 'vterm)
+;;   (claude-code-optimize-window-resize nil))
 
-(use-package claude-code
-  :straight (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main"
-                   :files ("*.el" (:exclude "images/*")))
-  :bind-keymap
-  ("C-c c" . claude-code-command-map) ;; or your preferred key
-  :config
-  (claude-code-mode)
-  :custom
-  (claude-code-terminal-backend 'vterm)
-  (claude-code-optimize-window-resize nil))
+;; (defun my-claude-notify (title message)
+;;   "Display a macOS notification with sound."
+;;   (call-process "osascript" nil nil nil
+;;                 "-e" (format "display notification \"%s\" with title \"%s\" sound name \"Glass\""
+;;                              message title)))
 
-(defun my-claude-notify (title message)
-  "Display a macOS notification with sound."
-  (call-process "osascript" nil nil nil
-                "-e" (format "display notification \"%s\" with title \"%s\" sound name \"Glass\""
-                             message title)))
-
-(setq claude-code-notification-function #'my-claude-notify)
+;; (setq claude-code-notification-function #'my-claude-notify)
 
 
 (provide 'william-bruschi-ai-tools)
@@ -335,3 +373,22 @@ For newlines, don't print \\n characters, actually use newlines like in the two 
 (gptel-make-preset 'rewrite-text
   :description "Rewrite general text"
   :system "I will provide you text, and I want you to correct any spelling and grammatical mistakes. Feel free to restructure into simple, shorter, clearer, language.")
+
+(defun william-bruschi/agent-shell-send-region-or-file-and-line ()
+  "Send a message to the agent, with the active region or file and line number."
+  (interactive)
+  (let ((msg (read-string "Message: ")))
+    (let ((prompt (if (use-region-p)
+                      (format "%s\n\n%s" msg (buffer-substring-no-properties (region-beginning) (region-end)))
+                    (format "%s @%s" msg (william-bruschi/file-name-and-line-number)))))
+      (let* ((shell-buffer-name (seq-first (agent-shell-project-buffers)))
+             (shell-buffer (if shell-buffer-name
+                               (get-buffer shell-buffer-name)
+                             (agent-shell-start :config (agent-shell-select-config)))))
+        (with-current-buffer shell-buffer
+          (goto-char (point-max))
+          (insert prompt)
+          (comint-send-input))
+        (switch-to-buffer-other-window shell-buffer)))))
+
+(define-key global-map (kbd "C-c c x") 'william-bruschi/agent-shell-send-region-or-file-and-line)
