@@ -380,18 +380,11 @@ For newlines, don't print \\n characters, actually use newlines like in the two 
 (defun william-bruschi/agent-shell-send-region-or-file-and-line ()
   "Send a message to the agent, with the active region or file and line number."
   (interactive)
-  (let ((msg (read-string "Message: ")))
-    (let ((prompt (if (use-region-p)
-                      (format "%s\n\n%s" msg (buffer-substring-no-properties (region-beginning) (region-end)))
-                    (format "%s @%s" msg (william-bruschi/file-name-and-line-number)))))
-      (let* ((shell-buffer-name (seq-first (agent-shell-project-buffers)))
-             (shell-buffer (if shell-buffer-name
-                               (get-buffer shell-buffer-name)
-                             (agent-shell-start :config (agent-shell-select-config)))))
-        (with-current-buffer shell-buffer
-          (goto-char (point-max))
-          (insert prompt)
-          (comint-send-input))
-        (switch-to-buffer-other-window shell-buffer)))))
+  (let* ((msg (read-string "Message: "))
+         (prompt (if (use-region-p)
+                     (format "%s\n\n%s" msg
+                             (buffer-substring-no-properties (region-beginning) (region-end)))
+                   (format "%s @%s" msg (william-bruschi/file-name-and-line-number)))))
+    (agent-shell-insert :text prompt :submit t)))
 
 (define-key global-map (kbd "C-c c x") 'william-bruschi/agent-shell-send-region-or-file-and-line)
