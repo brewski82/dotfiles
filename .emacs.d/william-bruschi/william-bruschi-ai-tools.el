@@ -38,10 +38,23 @@
   :custom
   (agent-shell-file-completion-enabled t)
   (agent-shell-google-authentication (agent-shell-google-make-authentication
-                                      :api-key (lambda () (get-gemini-password)))))
-
+                                      :api-key (lambda () (get-gemini-password))))
+  (agent-shell-anthropic-claude-environment
+   (agent-shell-make-environment-variables :inherit-env t)))
 
 ;;; Agent Shell custom commands
+
+(defun william-bruschi/agent-shell-send-region-or-file-and-line ()
+  "Send a message to the agent, with the active region or file and line number."
+  (interactive)
+  (let* ((msg (read-string "Message: "))
+         (prompt (if (use-region-p)
+                     (format "%s\n\n%s" msg
+                             (buffer-substring-no-properties (region-beginning) (region-end)))
+                   (format "%s @%s" msg (william-bruschi/file-name-and-line-number)))))
+    (agent-shell-insert :text prompt :submit t)))
+
+(define-key global-map (kbd "C-c c x") 'william-bruschi/agent-shell-send-region-or-file-and-line)
 
 
 (require 'gptel-integrations)
@@ -376,15 +389,3 @@ For newlines, don't print \\n characters, actually use newlines like in the two 
 (gptel-make-preset 'rewrite-text
   :description "Rewrite general text"
   :system "I will provide you text, and I want you to correct any spelling and grammatical mistakes. Feel free to restructure into simple, shorter, clearer, language.")
-
-(defun william-bruschi/agent-shell-send-region-or-file-and-line ()
-  "Send a message to the agent, with the active region or file and line number."
-  (interactive)
-  (let* ((msg (read-string "Message: "))
-         (prompt (if (use-region-p)
-                     (format "%s\n\n%s" msg
-                             (buffer-substring-no-properties (region-beginning) (region-end)))
-                   (format "%s @%s" msg (william-bruschi/file-name-and-line-number)))))
-    (agent-shell-insert :text prompt :submit t)))
-
-(define-key global-map (kbd "C-c c x") 'william-bruschi/agent-shell-send-region-or-file-and-line)
