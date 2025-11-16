@@ -44,17 +44,25 @@
 
 ;;; Agent Shell custom commands
 
-(defun william-bruschi/agent-shell-send-region-or-file-and-line ()
-  "Send a message to the agent, with the active region or file and line number."
-  (interactive)
+(defun william-bruschi/agent-shell-send-region-or-file-and-line (&optional arg)
+  "Send a message to the agent, with the active region or file and line number.
+With a prefix arg, do not submit the message."
+  (interactive "P")
   (let* ((msg (read-string "Message: "))
          (prompt (if (use-region-p)
                      (format "%s\n\n%s" msg
                              (buffer-substring-no-properties (region-beginning) (region-end)))
-                   (format "%s @%s" msg (william-bruschi/file-name-and-line-number)))))
-    (agent-shell-insert :text prompt :submit t)))
+                   (format "%s @%s" msg (william-bruschi/file-name-and-line-number))))
+         (submit (not arg)))
+    (agent-shell-insert :text prompt :submit submit)))
+
+(defun william-bruschi/agent-shell-send-region-or-file-and-line-no-submit (&optional arg)
+  (interactive)
+  (save-window-excursion
+    (william-bruschi/agent-shell-send-region-or-file-and-line t)))
 
 (define-key global-map (kbd "C-c c x") 'william-bruschi/agent-shell-send-region-or-file-and-line)
+(define-key global-map (kbd "C-c c d") 'william-bruschi/agent-shell-send-region-or-file-and-line-no-submit)
 
 
 (require 'gptel-integrations)
