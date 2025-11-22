@@ -35,12 +35,11 @@
 
 (use-package agent-shell
   :straight (:type git :host github :repo "xenodium/agent-shell")
-  :custom
-  (agent-shell-file-completion-enabled t)
-  (agent-shell-google-authentication (agent-shell-google-make-authentication
-                                      :api-key (lambda () (get-gemini-password))))
-  (agent-shell-anthropic-claude-environment
-   (agent-shell-make-environment-variables :inherit-env t)))
+  :config
+  (setq agent-shell-file-completion-enabled t
+        agent-shell-google-authentication (agent-shell-google-make-authentication
+                                           :api-key (lambda () (get-gemini-password)))
+        agent-shell-anthropic-claude-environment (agent-shell-make-environment-variables :inherit-env t)))
 
 ;;; Agent Shell custom commands
 
