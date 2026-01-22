@@ -93,6 +93,9 @@
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
 
+  ;; https://github.com/minad/vertico?tab=readme-ov-file#completion-at-point-and-completion-in-region
+  (setq completion-in-region-function #'consult-completion-in-region)
+
   ;; Configure other variables and modes in the :config section,
   ;; after lazily loading the package.
   :config
@@ -204,15 +207,6 @@
 
 ;;; Org
 (require 'william-bruschi-org-setup nil nil)
-
-(use-package company-mode
-  :config
-  (setq company-idle-delay 0.0
-        company-minimum-prefix-length 1)
-  :bind (:map company-active-map
-              ("C-n" . company-select-next)
-              ("C-p" . company-select-previous)
-              ("<tab>". company-complete-selection)))
 
 (use-package yasnippet
   :config (yas-global-mode 1))
@@ -365,9 +359,6 @@
 ;; default to unified diffs
 (setq diff-switches "-u")
 
-;; Copy paste between apps
-(setq x-select-enable-clipboard t)
-
 (put 'downcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
@@ -430,6 +421,14 @@
 ;;; Mac setup
 (setq mac-command-modifier 'meta)
 (setq mac-option-modifier 'meta)
+
+;;; Remap Cmd V for paste on mac
+(when (memq window-system '(mac ns))
+  (global-set-key (kbd "M-v") 'yank)
+  (global-set-key (kbd "C-S-v") 'scroll-down-command))
+
+;; Copy paste between apps
+(setq x-select-enable-clipboard t)
 
 ;;; Recent files
 (recentf-mode 1)
@@ -546,7 +545,6 @@
 (dolist (hook '(python-mode-hook rjsx-mode-hook typescript-mode-hook))
   (add-hook hook (lambda ()
                    (eglot-ensure)
-                   (company-mode 1)
                    (define-key eglot-mode-map (kbd "M-.") 'xref-find-definitions)
                    (define-key eglot-mode-map (kbd "C-.") 'xref-find-definitions)
                    (define-key eglot-mode-map (kbd "C-,") 'xref-go-back))))
