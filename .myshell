@@ -9,7 +9,7 @@ export HISTFILESIZE=1000000
 export HISTSIZE=1000000
 export SAVEHIST=1000000
 
-export EDITOR=nano
+export EDITOR="emacsclient -r"
 export VISUAL="$EDITOR"
 
 # Tell ls to be colourful
