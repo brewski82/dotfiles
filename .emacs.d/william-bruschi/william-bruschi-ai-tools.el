@@ -58,9 +58,16 @@ With a prefix arg, do not submit the message."
   (interactive "P")
   (let* ((msg (read-string "Message: "))
          (prompt (if (use-region-p)
-                     (format "%s\n\n%s" msg
-                             (buffer-substring-no-properties (region-beginning) (region-end)))
+                     (format "%s\n\n%s\n\n" msg
+                             (agent-shell--context))
                    (format "%s @%s" msg (william-bruschi/file-name-and-line-number))))
+         (submit (not arg)))
+    (agent-shell-insert :text prompt :submit submit)))
+
+(defun william-bruschi/agent-shell-send-prompt (&optional arg)
+  "Sends a prompt to agent shell"
+  (interactive "P")
+  (let* ((prompt (read-string "Message: "))
          (submit (not arg)))
     (agent-shell-insert :text prompt :submit submit)))
 
@@ -69,9 +76,21 @@ With a prefix arg, do not submit the message."
   (save-window-excursion
     (william-bruschi/agent-shell-send-region-or-file-and-line t)))
 
-(define-key global-map (kbd "C-c c x") 'william-bruschi/agent-shell-send-region-or-file-and-line)
-(define-key global-map (kbd "C-c c d") 'william-bruschi/agent-shell-send-region-or-file-and-line-no-submit)
+(transient-define-prefix william-bruschi/ai-trainsient ()
+  "AI Shell Commands"
+  [[ "Send"
+     ("p" "prompt" william-bruschi/agent-shell-send-prompt)
+     ("c" "comment" william-bruschi/agent-shell-send-region-or-file-and-line-no-submit)
+     ("i" "send comment" william-bruschi/agent-shell-send-region-or-file-and-line)]
+   [ "Visit"
+     ("s" "shell" agent-shell)]])
 
+(defun william-bruschi/run-ai-menu ()
+  (interactive)
+  (save-buffer)
+  (william-bruschi/ai-trainsient))
+
+(define-key global-map (kbd "C-c a") 'william-bruschi/run-ai-menu)
 
 (require 'gptel-integrations)
 
