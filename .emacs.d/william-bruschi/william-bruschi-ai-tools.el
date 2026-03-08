@@ -35,11 +35,20 @@
 
 (use-package agent-shell
   :straight (:type git :host github :repo "xenodium/agent-shell")
+  :bind (:map agent-shell-mode-map
+              ("RET" . newline)
+              ("M-RET" . shell-maker-submit))
   :config
   (setq agent-shell-file-completion-enabled t
         agent-shell-google-authentication (agent-shell-google-make-authentication
                                            :api-key (lambda () (get-gemini-password)))
         agent-shell-anthropic-claude-environment (agent-shell-make-environment-variables :inherit-env t)))
+
+(use-package agent-shell-manager
+  :straight (:type git :host github :repo "jethrokuan/agent-shell-manager")
+  :config
+  ;; Options: 'left, 'right, 'top, 'bottom, or nil
+  (setq agent-shell-manager-side 'left))
 
 ;;; Agent Shell custom commands
 
