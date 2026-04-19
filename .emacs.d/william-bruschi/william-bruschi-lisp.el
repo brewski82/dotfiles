@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;; Lisp setup
 (use-package paredit
   :hook ((emacs-lisp-mode lisp-mode slime-repl-mode ) . paredit-mode))

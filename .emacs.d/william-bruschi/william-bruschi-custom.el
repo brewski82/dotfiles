@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (provide 'william-bruschi-custom)
 
 (defun william-bruschi/eglot-current-server ()

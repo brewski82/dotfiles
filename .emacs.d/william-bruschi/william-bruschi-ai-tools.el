@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (require 'auth-source)
 
 ;;; AI
@@ -13,12 +14,6 @@
   (funcall (plist-get
             (car (auth-source-search :host "anthropic" :service "apikey")) :secret)))
 
-(use-package shell-maker
-  :ensure t)
-
-(use-package acp
-  :straight (:type git :host github :repo "xenodium/acp.el"))
-
 (use-package agent-shell
   :straight (:type git :host github :repo "xenodium/agent-shell")
   :bind (:map agent-shell-mode-map
@@ -28,10 +23,16 @@
   (setq agent-shell-file-completion-enabled t
         agent-shell-google-authentication (agent-shell-google-make-authentication
                                            :api-key (lambda () (get-gemini-password)))
-        agent-shell-anthropic-claude-environment (agent-shell-make-environment-variables :inherit-env t)))
+        agent-shell-anthropic-claude-environment (agent-shell-make-environment-variables :inherit-env t))
 
-
-(define-prefix-command 'agent-shell-command-map)
+  (define-prefix-command 'agent-shell-command-map)
+  (define-key agent-shell-command-map (kbd "p") 'william-bruschi/agent-shell-send-prompt)
+  (define-key agent-shell-command-map (kbd "c") 'william-bruschi/agent-shell-send-region-or-file-and-line-no-submit)
+  (define-key agent-shell-command-map (kbd "i") 'william-bruschi/agent-shell-send-region-or-file-and-line)
+  (define-key agent-shell-command-map (kbd "s") 'agent-shell)
+  (define-key agent-shell-command-map (kbd "l") 'william-bruschi/agent-shell-list)
+  (define-key agent-shell-command-map (kbd "t") 'william-bruschi/agent-shell-tile)
+  (global-set-key (kbd "C-c A") agent-shell-command-map))
 
 ;;; Agent Shell Manager
 
@@ -68,24 +69,28 @@
          ((not (map-elt state :initialized)) "initializing")
          (t "unknown"))))))
 
-(defun william-bruschi/agent-shell--status-string (buf)
-  "Return propertized status string for BUF."
-  (let ((status (william-bruschi/agent-shell--get-status buf)))
+(defun william-bruschi/agent-shell--status-string (buf &optional status)
+  "Return propertized status string for BUF.
+If STATUS is provided, use it instead of computing it."
+  (let ((s (or status (william-bruschi/agent-shell--get-status buf))))
     (cond
-     ((string= status "killed")      (propertize "Killed"     'face 'error))
-     ((string= status "ready")       (propertize "Ready"      'face 'success))
-     ((string= status "working")     (propertize "Working"    'face 'warning))
-     ((string= status "waiting")     (propertize "Waiting"    'face 'font-lock-keyword-face))
-     ((string= status "initializing")(propertize "Starting…"  'face 'font-lock-comment-face))
-     (t                              (propertize "Unknown"    'face 'font-lock-comment-face)))))
+     ((string= s "killed")      (propertize "Killed"     'face 'error))
+     ((string= s "ready")       (propertize "Ready"      'face 'success))
+     ((string= s "working")     (propertize "Working"    'face 'warning))
+     ((string= s "waiting")     (propertize "Waiting"    'face 'font-lock-keyword-face))
+     ((string= s "initializing")(propertize "Starting…"  'face 'font-lock-comment-face))
+     (t                         (propertize "Unknown"    'face 'font-lock-comment-face)))))
 
 (defun william-bruschi/agent-shell--entries ()
   "Return tabulated-list entries for all agent-shell buffers."
   (let* ((bufs (william-bruschi/agent-shell-get-buffers))
          (entries (mapcar (lambda (buf)
-                            (list buf
-                                  (vector (buffer-name buf)
-                                          (william-bruschi/agent-shell--status-string buf))))
+                            (let* ((status (william-bruschi/agent-shell--get-status buf))
+                                   (buf-name (buffer-name buf))
+                                   (icon (if (string= status "waiting") "⚠ " "")))
+                              (list buf
+                                    (vector (concat icon buf-name)
+                                            (william-bruschi/agent-shell--status-string buf status)))))
                           bufs)))
     (sort entries
           (lambda (a b)
@@ -239,15 +244,5 @@ With a prefix arg, do not submit the message."
   (save-window-excursion
     (william-bruschi/agent-shell-send-region-or-file-and-line t)))
 
-;;; Agent Shell Command Map Bindings
-
-(define-key agent-shell-command-map (kbd "p") 'william-bruschi/agent-shell-send-prompt)
-(define-key agent-shell-command-map (kbd "c") 'william-bruschi/agent-shell-send-region-or-file-and-line-no-submit)
-(define-key agent-shell-command-map (kbd "i") 'william-bruschi/agent-shell-send-region-or-file-and-line)
-(define-key agent-shell-command-map (kbd "s") 'agent-shell)
-(define-key agent-shell-command-map (kbd "l") 'william-bruschi/agent-shell-list)
-(define-key agent-shell-command-map (kbd "t") 'william-bruschi/agent-shell-tile)
-
-(define-key global-map (kbd "C-c A") agent-shell-command-map)
 
 (provide 'william-bruschi-ai-tools)

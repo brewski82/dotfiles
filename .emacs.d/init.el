@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;; Straight
 ;;; https://github.com/raxod502/straight.el#getting-started
 (defvar bootstrap-version)
@@ -552,3 +554,6 @@
 (require 'william-bruschi-custom)
 (require 'william-bruschi-ai-tools)
 (require 'william-bruschi-init-post nil t)
+
+(server-start)
+(toggle-frame-maximized)
