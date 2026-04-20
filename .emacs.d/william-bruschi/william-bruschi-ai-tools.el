@@ -105,6 +105,7 @@ If STATUS is provided, use it instead of computing it."
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "RET") #'william-bruschi/agent-shell-list-select)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "o")   #'william-bruschi/agent-shell-list-select-other-window)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "g")   #'william-bruschi/agent-shell-list-refresh)
+  (define-key william-bruschi/agent-shell-list-mode-map (kbd "k")   #'william-bruschi/agent-shell-list-kill)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "q")   #'quit-window)
   (tabulated-list-init-header)
   (when william-bruschi/agent-shell-list--refresh-timer
@@ -162,6 +163,15 @@ If STATUS is provided, use it instead of computing it."
         (when (eq other list-window)
           (split-window-right))
         (set-window-buffer (next-window list-window 'skip-minibuf 'visible) buf)))))
+
+(defun william-bruschi/agent-shell-list-kill ()
+  "Kill the selected agent-shell buffer after confirmation."
+  (interactive)
+  (when-let* ((buf (tabulated-list-get-id)))
+    (if (not (buffer-live-p buf))
+        (user-error "Buffer no longer exists")
+      (when (y-or-n-p (format "Kill buffer %s? " (buffer-name buf)))
+        (kill-buffer buf)))))
 
 (defun william-bruschi/agent-shell-list ()
   "Toggle the agent-shell list side window."
