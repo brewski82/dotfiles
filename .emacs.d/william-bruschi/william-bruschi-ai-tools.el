@@ -36,8 +36,15 @@
 
 ;;; Agent Shell Manager
 
+(defcustom william-bruschi/agent-shell-ai-summaries nil
+  "When non-nil, use AI to summarize completed agent tasks in the list."
+  :type 'boolean
+  :group 'william-bruschi)
+
 (defvar william-bruschi/agent-shell-list-buffer-name "*agent-shell-list*")
+(defvar william-bruschi/agent-shell--prev-states (make-hash-table :test #'eq))
 (defvar-local william-bruschi/agent-shell-list--refresh-timer nil)
+(defvar-local william-bruschi/agent-shell--summary nil)
 
 (defun william-bruschi/agent-shell-get-buffers ()
   "Return list of live agent-shell buffers."
@@ -81,33 +88,109 @@ If STATUS is provided, use it instead of computing it."
      ((string= s "initializing")(propertize "Starting…"  'face 'font-lock-comment-face))
      (t                         (propertize "Unknown"    'face 'font-lock-comment-face)))))
 
-(defun william-bruschi/agent-shell--entries ()
-  "Return tabulated-list entries for all agent-shell buffers."
-  (let* ((bufs (william-bruschi/agent-shell-get-buffers))
-         (entries (mapcar (lambda (buf)
-                            (let* ((status (william-bruschi/agent-shell--get-status buf))
-                                   (buf-name (buffer-name buf))
-                                   (icon (if (string= status "waiting") "⚠ " "")))
-                              (list buf
-                                    (vector (concat icon buf-name)
-                                            (william-bruschi/agent-shell--status-string buf status)))))
-                          bufs)))
-    (sort entries
-          (lambda (a b)
-            (let ((sa (substring-no-properties (aref (cadr a) 1)))
-                  (sb (substring-no-properties (aref (cadr b) 1))))
-              (and (string= sa "Killed") (not (string= sb "Killed"))))))))
+(defun william-bruschi/agent-shell--get-last-content (buf lines)
+  "Extract the last LINES from agent shell buffer BUF."
+  (with-current-buffer buf
+    (let* ((content (buffer-substring-no-properties (point-min) (point-max)))
+           (all-lines (split-string content "\n")))
+      (mapconcat #'identity (last all-lines lines) "\n"))))
 
-(define-derived-mode william-bruschi/agent-shell-list-mode tabulated-list-mode "AgentShellList"
+(defun william-bruschi/agent-shell--request-summary (buf)
+  "Request AI summary for agent shell BUF via claude CLI, store in buffer-local variable."
+  (let* ((content (william-bruschi/agent-shell--get-last-content buf 80))
+         (prompt (format "Summarize this Claude Code agent's recent work in 5-10 words. Reply with only the summary, no extra text.\n\n%s" content))
+         (api-buf (generate-new-buffer " *agent-shell-api*"))
+         (default-directory temporary-file-directory))
+    (make-process
+     :name (concat "agent-shell-summarize-" (buffer-name buf))
+     :buffer api-buf
+     :command `("claude" "-p" "--model" "haiku" "--output-format" "text" ,prompt)
+     :sentinel (lambda (proc event)
+                 (when (string-match-p "finished" event)
+                   (let ((text (with-current-buffer (process-buffer proc)
+                                 (string-trim (buffer-string)))))
+                     (when (and (not (string-empty-p text)) (buffer-live-p buf))
+                       (with-current-buffer buf
+                         (setq-local william-bruschi/agent-shell--summary
+                                     (truncate-string-to-width text 50)))))
+                   (kill-buffer (process-buffer proc)))))))
+
+(defun william-bruschi/agent-shell--render-entries ()
+  "Render agent-shell buffers in list buffer with multi-line format."
+  (let* ((bufs (william-bruschi/agent-shell-get-buffers))
+         (sorted-bufs (sort bufs (lambda (a b)
+                                   (let ((sa (william-bruschi/agent-shell--get-status a))
+                                         (sb (william-bruschi/agent-shell--get-status b)))
+                                     (if (string= sa sb)
+                                         (string< (buffer-name a) (buffer-name b))
+                                       (and (string= sa "killed") (not (string= sb "killed")))))))))
+    (with-current-buffer william-bruschi/agent-shell-list-buffer-name
+      (let ((inhibit-read-only t)
+            (saved-agent (get-text-property (point) 'agent-buf)))
+        (erase-buffer)
+        (dolist (buf sorted-bufs)
+          (let* ((status (william-bruschi/agent-shell--get-status buf))
+                 (buf-name (buffer-name buf))
+                 (icon (if (string= status "waiting") "⚠ " "  "))
+                 (summary (buffer-local-value 'william-bruschi/agent-shell--summary buf))
+                 (entry-start (point)))
+            (insert icon buf-name "\n")
+            (insert "  " (william-bruschi/agent-shell--status-string buf status) "\n")
+            (when summary
+              (insert "  " summary "\n"))
+            (insert "\n")
+            (put-text-property entry-start (point) 'agent-buf buf)))
+        (goto-char (point-min))
+        (when saved-agent
+          (while (and (not (eobp))
+                      (not (eq (get-text-property (point) 'agent-buf) saved-agent)))
+            (forward-line))
+          (when (eobp) (goto-char (point-min))))))))
+
+(defun william-bruschi/agent-shell--get-current-buf ()
+  "Get the agent buffer under cursor."
+  (get-text-property (point) 'agent-buf))
+
+(defun william-bruschi/agent-shell--next-entry ()
+  "Move to next agent entry."
+  (interactive)
+  (let ((current-buf (william-bruschi/agent-shell--get-current-buf))
+        (found nil))
+    (forward-line)
+    (while (and (not found) (not (eobp)))
+      (let ((buf-here (get-text-property (point) 'agent-buf)))
+        (if (and buf-here (not (eq current-buf buf-here)))
+            (setq found t)
+          (forward-line))))
+    (unless found (goto-char (point-min)))))
+
+(defun william-bruschi/agent-shell--prev-entry ()
+  "Move to previous agent entry."
+  (interactive)
+  (let ((current-buf (william-bruschi/agent-shell--get-current-buf))
+        (found nil))
+    (forward-line -1)
+    (while (and (not found) (not (bobp)))
+      (let ((buf-here (get-text-property (point) 'agent-buf)))
+        (if (and buf-here (not (eq current-buf buf-here)))
+            (setq found t)
+          (forward-line -1))))
+    (unless found
+      (goto-char (point-max))
+      (forward-line -1)
+      (while (not (get-text-property (point) 'agent-buf))
+        (forward-line -1)))))
+
+(define-derived-mode william-bruschi/agent-shell-list-mode special-mode "AgentShellList"
   "Mode for managing agent shell buffers."
-  (setq tabulated-list-format [("Buffer" 40 t) ("Status" 12 t)]
-        tabulated-list-padding 2)
+  (setq truncate-lines t)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "RET") #'william-bruschi/agent-shell-list-select)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "o")   #'william-bruschi/agent-shell-list-select-other-window)
+  (define-key william-bruschi/agent-shell-list-mode-map (kbd "n")   #'william-bruschi/agent-shell--next-entry)
+  (define-key william-bruschi/agent-shell-list-mode-map (kbd "p")   #'william-bruschi/agent-shell--prev-entry)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "g")   #'william-bruschi/agent-shell-list-refresh)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "k")   #'william-bruschi/agent-shell-list-kill)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "q")   #'quit-window)
-  (tabulated-list-init-header)
   (when william-bruschi/agent-shell-list--refresh-timer
     (cancel-timer william-bruschi/agent-shell-list--refresh-timer))
   (setq william-bruschi/agent-shell-list--refresh-timer
@@ -125,13 +208,21 @@ If STATUS is provided, use it instead of computing it."
   (let ((list-buf (get-buffer william-bruschi/agent-shell-list-buffer-name)))
     (when (and list-buf (buffer-live-p list-buf))
       (with-current-buffer list-buf
-        (setq tabulated-list-entries (william-bruschi/agent-shell--entries))
-        (tabulated-list-print t)))))
+        (dolist (buf (william-bruschi/agent-shell-get-buffers))
+          (let* ((current-status (william-bruschi/agent-shell--get-status buf))
+                 (prev-status (gethash buf william-bruschi/agent-shell--prev-states)))
+            (when (and william-bruschi/agent-shell-ai-summaries
+                       (not (string= current-status "killed"))
+                       (or (string= prev-status "working") (string= prev-status "waiting"))
+                       (string= current-status "ready"))
+              (william-bruschi/agent-shell--request-summary buf))
+            (puthash buf current-status william-bruschi/agent-shell--prev-states)))
+        (william-bruschi/agent-shell--render-entries)))))
 
 (defun william-bruschi/agent-shell-list-select ()
   "Switch to selected agent-shell buffer, keeping the list window open."
   (interactive)
-  (when-let* ((buf (tabulated-list-get-id)))
+  (when-let* ((buf (william-bruschi/agent-shell--get-current-buf)))
     (if (not (buffer-live-p buf))
         (user-error "Buffer no longer exists")
       (let ((buf-window (get-buffer-window buf t))
@@ -155,7 +246,7 @@ If STATUS is provided, use it instead of computing it."
 (defun william-bruschi/agent-shell-list-select-other-window ()
   "Open selected agent-shell buffer in another window, like dired's \\[dired-find-file-other-window]."
   (interactive)
-  (when-let* ((buf (tabulated-list-get-id)))
+  (when-let* ((buf (william-bruschi/agent-shell--get-current-buf)))
     (if (not (buffer-live-p buf))
         (user-error "Buffer no longer exists")
       (let* ((list-window (selected-window))
@@ -167,7 +258,7 @@ If STATUS is provided, use it instead of computing it."
 (defun william-bruschi/agent-shell-list-kill ()
   "Kill the selected agent-shell buffer after confirmation."
   (interactive)
-  (when-let* ((buf (tabulated-list-get-id)))
+  (when-let* ((buf (william-bruschi/agent-shell--get-current-buf)))
     (if (not (buffer-live-p buf))
         (user-error "Buffer no longer exists")
       (when (y-or-n-p (format "Kill buffer %s? " (buffer-name buf)))
