@@ -17,6 +17,14 @@
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 
+;;; Shell env variables.
+(use-package exec-path-from-shell
+  :config
+  (when (memq window-system '(mac ns x))
+    (setq exec-path-from-shell-variables '("PATH" "MANPATH" "LIBRARY_PATH" "LD_LIBRARY_PATH"))
+    (exec-path-from-shell-initialize)))
+
+
 (push "~/.emacs.d/william-bruschi" load-path)
 (require 'william-bruschi-init-pre nil nil)
 
@@ -259,7 +267,7 @@
                                    eshell-mode
                                    shell-mode
                                    comint-mode
-                                   vterm-mode
+                                    ghostel-mode
                                    eat-mode)))
 
 ;;; Buffer settings
@@ -339,17 +347,13 @@
 ;; (setq frame-title-format '("Emacs @ " system-name ": %b %+%+ %f"))
 (setq frame-title-format (concat invocation-name "@" system-name ": %b %+%+ %f"))
 
-;;; vterm https://github.com/akermu/emacs-libvterm
-(use-package vterm
-  :config (setq vterm-timer-delay nil)
-  ;; https://github.com/akermu/emacs-libvterm/issues/765
-  :config (define-key vterm-mode-map [return] nil t)
-  :custom
-  (vterm-max-scrollback 10000)
-  (vterm-always-compile-module t)
-  :hook (vterm-mode . (lambda ()
-                        (setq buffer-face-mode-face '(:family "JuliaMono"))
-                        (buffer-face-mode))))
+(use-package ghostel
+  :ensure t
+  :hook (ghostel-mode . (lambda ()
+                          (setq buffer-face-mode-face '(:family "JuliaMono"))
+                          (buffer-face-mode))))
+
+
 
 ;;; Scroll bar
 (use-package sml-modeline
@@ -397,12 +401,6 @@
 (setq python-shell-interpreter "python3")
 (setq python-shell-interpreter "ipython3"
       python-shell-interpreter-args "--simple-prompt -i")
-
-;;; Shell env variables.
-(use-package exec-path-from-shell
-  :config
-  (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize)))
 
 (use-package isend-mode
   :custom

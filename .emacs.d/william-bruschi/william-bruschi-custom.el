@@ -212,55 +212,55 @@ clipboard. Also supports magit diff buffers."
   (other-window 2)
   (balance-windows))
 
-(defun william-bruschi/vterm-buffer-name-suffix (directory)
+(defun william-bruschi/ghostel-buffer-name-suffix (directory)
   (file-name-nondirectory
    (directory-file-name (file-name-directory directory))))
 
-(defun william-bruschi/vterm-open (directory)
-  (let* ((vterm-buffer-name
-          (concat "vterm-"
-                  (william-bruschi/vterm-buffer-name-suffix directory)))
+(defun william-bruschi/ghostel-open (directory)
+  (let* ((ghostel-buffer-name
+          (concat "ghostel-"
+                  (william-bruschi/ghostel-buffer-name-suffix directory)))
          (default-directory directory)
-         (vterm-buffer (vterm t)))
-    (rename-buffer vterm-buffer-name)
-    vterm-buffer-name))
+         (ghostel-buffer (ghostel t)))
+    (rename-buffer ghostel-buffer-name)
+    ghostel-buffer-name))
 
-(defun william-bruschi/vterm-current-dir ()
-  "Opens vterm in a new buffer with a new based on the current
+(defun william-bruschi/ghostel-current-dir ()
+  "Opens ghostel in a new buffer with a new based on the current
 directory."
   (interactive)
   (let* ((current-directory (or (buffer-file-name)
                                 default-directory
                                 (substitute-in-file-name "$HOME/"))))
-    (william-bruschi/vterm-open current-directory)))
+    (william-bruschi/ghostel-open current-directory)))
 
-(defun william-bruschi/vterm-home ()
-  "Opens vterm in a new buffer with the current directory set to the
-user's home directory. Names the buffer vterm-home."
+(defun william-bruschi/ghostel-home ()
+  "Opens ghostel in a new buffer with the current directory set to the
+user's home directory. Names the buffer ghostel-home."
   (interactive)
-  (let ((buffer-name "vterm-home"))
+  (let ((buffer-name "ghostel-home"))
     (if (get-buffer buffer-name)
         (switch-to-buffer buffer-name)
       (let ((default-directory "~/"))
-        (vterm buffer-name)))))
+        (ghostel buffer-name)))))
 
-(defun william-bruschi/vterm-vc-root ()
-  "Opens vterm in a new buffer in the root vc directory"
+(defun william-bruschi/ghostel-vc-root ()
+  "Opens ghostel in a new buffer in the root vc directory"
   (interactive)
   (let* ((current-directory (project-root (project-current))))
     (unless current-directory
       (error "vc root not found"))
-    (william-bruschi/vterm-open current-directory)))
+    (william-bruschi/ghostel-open current-directory)))
 
-(defun william-bruschi/vterm-package ()
-  "Opens vterm in a new buffer in the nearest package.json
+(defun william-bruschi/ghostel-package ()
+  "Opens ghostel in a new buffer in the nearest package.json
 directory."
   (interactive)
   (let* ((current-directory (jest-test-project-root (or (buffer-file-name)
                                                         default-directory))))
     (unless current-directory
       (error "package not found"))
-    (william-bruschi/vterm-open current-directory)))
+    (william-bruschi/ghostel-open current-directory)))
 
 (defun william-bruschi/compile (command)
   "Runs compile with bash login shell"
