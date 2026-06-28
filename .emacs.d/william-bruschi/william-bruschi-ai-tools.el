@@ -158,6 +158,22 @@ If STATUS is provided, use it instead of computing it."
         (match-string 1 name)
       "Agent")))
 
+(defun william-bruschi/agent-shell--extract-branch (buf)
+  "Extract VC branch/revision from agent shell buffer BUF's context directory.
+Returns nil if not in a VC-managed directory."
+  (let* ((default-directory (or (buffer-local-value 'default-directory buf) default-directory)))
+    (condition-case err
+        (let ((backend (vc-responsible-backend default-directory)))
+          (when backend
+            (cond
+             ((eq backend 'Git)
+              (car (vc-git-branches)))
+             ((eq backend 'Hg)
+              (car (vc-hg-branches)))
+             (t
+              (vc-working-revision default-directory backend)))))
+      (error nil))))
+
 (defun william-bruschi/agent-shell--render-entries ()
   "Render agent-shell buffers in list buffer with multi-line format."
   (let* ((bufs (william-bruschi/agent-shell-get-buffers))
@@ -178,10 +194,13 @@ If STATUS is provided, use it instead of computing it."
         (dolist (buf sorted-bufs)
           (let* ((status (william-bruschi/agent-shell--get-status buf))
                  (repo (william-bruschi/agent-shell--extract-repo buf))
+                 (branch (william-bruschi/agent-shell--extract-branch buf))
                  (agent-type (william-bruschi/agent-shell--extract-agent-type buf))
                  (summary (buffer-local-value 'william-bruschi/agent-shell--summary buf))
                  (entry-start (point)))
             (insert repo "\n")
+            (when branch
+              (insert "  " branch "\n"))
             (insert "  " agent-type "\n")
             (insert "  " (william-bruschi/agent-shell--status-string buf status) "\n")
             (when summary
