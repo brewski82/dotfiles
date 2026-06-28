@@ -41,6 +41,12 @@
   :type 'boolean
   :group 'william-bruschi)
 
+(defcustom william-bruschi/agent-shell-summary-model nil
+  "Model ID to use for summarizing agent shell output.
+When nil, uses the agent buffer's current model."
+  :type '(choice (const nil) string)
+  :group 'william-bruschi)
+
 (defvar william-bruschi/agent-shell-list-buffer-name "*agent-shell-list*")
 (defvar william-bruschi/agent-shell--prev-states (make-hash-table :test #'eq))
 (defvar-local william-bruschi/agent-shell-list--refresh-timer nil)
@@ -95,25 +101,62 @@ If STATUS is provided, use it instead of computing it."
            (all-lines (split-string content "\n")))
       (mapconcat #'identity (last all-lines lines) "\n"))))
 
+(defun william-bruschi/agent-shell--extract-json-text (json-lines)
+  "Extract text content from JSON output lines."
+  (let ((result nil))
+    (dolist (line (split-string json-lines "\n" t))
+      (condition-case nil
+          (let* ((data (json-parse-string line))
+                 (type (gethash "type" data)))
+            (when (string= type "text")
+              (let ((part (gethash "part" data)))
+                (when part
+                  (let ((text (gethash "text" part)))
+                    (when text
+                      (setq result (concat (or result "") text))))))))
+        (error nil)))
+    result))
+
 (defun william-bruschi/agent-shell--request-summary (buf)
-  "Request AI summary for agent shell BUF via claude CLI, store in buffer-local variable."
+  "Request AI summary for agent shell BUF, store in buffer-local variable."
   (let* ((content (william-bruschi/agent-shell--get-last-content buf 80))
-         (prompt (format "Summarize this Claude Code agent's recent work in 5-10 words. Reply with only the summary, no extra text.\n\n%s" content))
+         (prompt (format "Summarize this agent's recent work in 5-10 words. Reply with only the summary, no extra text.\n\n%s" content))
          (api-buf (generate-new-buffer " *agent-shell-api*"))
          (default-directory temporary-file-directory))
     (make-process
      :name (concat "agent-shell-summarize-" (buffer-name buf))
      :buffer api-buf
-     :command `("claude" "-p" "--model" "haiku" "--output-format" "text" ,prompt)
+     :command (william-bruschi/agent-shell--summary-command buf prompt)
      :sentinel (lambda (proc event)
                  (when (string-match-p "finished" event)
                    (let ((text (with-current-buffer (process-buffer proc)
-                                 (string-trim (buffer-string)))))
-                     (when (and (not (string-empty-p text)) (buffer-live-p buf))
+                                 (william-bruschi/agent-shell--extract-json-text (buffer-string)))))
+                     (when (and text (not (string-empty-p text)) (buffer-live-p buf))
                        (with-current-buffer buf
                          (setq-local william-bruschi/agent-shell--summary
                                      (truncate-string-to-width text 50)))))
                    (kill-buffer (process-buffer proc)))))))
+
+(defun william-bruschi/agent-shell--summary-command (_buf prompt)
+  "Return command list for summarizing using opencode with PROMPT."
+  (let ((model william-bruschi/agent-shell-summary-model))
+    (append '("opencode" "run" "--format" "json")
+            (when model (list "-m" model))
+            (list prompt))))
+
+(defun william-bruschi/agent-shell--extract-repo (buf)
+  "Extract repo name from agent shell buffer BUF."
+  (let ((name (buffer-name buf)))
+    (if (string-match " @ \\(.+\\)$" name)
+        (match-string 1 name)
+      name)))
+
+(defun william-bruschi/agent-shell--extract-agent-type (buf)
+  "Extract agent type from agent shell buffer BUF."
+  (let ((name (buffer-name buf)))
+    (if (string-match "^\\(.+?\\) Agent" name)
+        (match-string 1 name)
+      "Agent")))
 
 (defun william-bruschi/agent-shell--render-entries ()
   "Render agent-shell buffers in list buffer with multi-line format."
@@ -122,7 +165,11 @@ If STATUS is provided, use it instead of computing it."
                                    (let ((sa (william-bruschi/agent-shell--get-status a))
                                          (sb (william-bruschi/agent-shell--get-status b)))
                                      (if (string= sa sb)
-                                         (string< (buffer-name a) (buffer-name b))
+                                         (let ((ta (buffer-local-value 'buffer-display-time a))
+                                               (tb (buffer-local-value 'buffer-display-time b)))
+                                           (if (and ta tb)
+                                               (time-less-p tb ta)
+                                             (if ta t nil)))
                                        (and (string= sa "killed") (not (string= sb "killed")))))))))
     (with-current-buffer william-bruschi/agent-shell-list-buffer-name
       (let ((inhibit-read-only t)
@@ -130,11 +177,12 @@ If STATUS is provided, use it instead of computing it."
         (erase-buffer)
         (dolist (buf sorted-bufs)
           (let* ((status (william-bruschi/agent-shell--get-status buf))
-                 (buf-name (buffer-name buf))
-                 (icon (if (string= status "waiting") "⚠ " "  "))
+                 (repo (william-bruschi/agent-shell--extract-repo buf))
+                 (agent-type (william-bruschi/agent-shell--extract-agent-type buf))
                  (summary (buffer-local-value 'william-bruschi/agent-shell--summary buf))
                  (entry-start (point)))
-            (insert icon buf-name "\n")
+            (insert repo "\n")
+            (insert "  " agent-type "\n")
             (insert "  " (william-bruschi/agent-shell--status-string buf status) "\n")
             (when summary
               (insert "  " summary "\n"))
@@ -183,7 +231,8 @@ If STATUS is provided, use it instead of computing it."
 
 (define-derived-mode william-bruschi/agent-shell-list-mode special-mode "AgentShellList"
   "Mode for managing agent shell buffers."
-  (setq truncate-lines t)
+  (setq truncate-lines nil)
+  (visual-line-mode 1)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "RET") #'william-bruschi/agent-shell-list-select)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "o")   #'william-bruschi/agent-shell-list-select-other-window)
   (define-key william-bruschi/agent-shell-list-mode-map (kbd "n")   #'william-bruschi/agent-shell--next-entry)
