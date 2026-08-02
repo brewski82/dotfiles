@@ -413,5 +413,26 @@ With a prefix arg, do not submit the message."
   (save-window-excursion
     (william-bruschi/agent-shell-send-region-or-file-and-line t)))
 
+(defun william-bruschi/agent-shell-new ()
+  "Select a project and open agent-shell with magit-status side-by-side.
+Prompts for a project directory, then opens the agent-shell buffer on the
+left and the magit-status buffer on the right."
+  (interactive)
+  (let* ((project-dir (project-prompt-project-dir "Select project: "))
+         (default-directory project-dir))
+    (delete-other-windows)
+    ;; Open agent-shell first - it handles all its prompts
+    (let ((display-buffer-overriding-action
+           '(display-buffer-use-some-window
+             (inhibit-same-window . nil))))
+      (call-interactively 'agent-shell))
+    ;; After agent-shell is ready, split and show magit
+    (let ((agent-buf (current-buffer)))
+      (split-window-right)
+      (other-window 1)
+      (magit-status)
+      (other-window -1))))
+
+
 
 (provide 'william-bruschi-ai-tools)
