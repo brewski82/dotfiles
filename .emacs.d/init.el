@@ -235,9 +235,10 @@
 ;;; Magit
 (use-package magit
   :ensure t
-  :bind (("C-x g" . magit-status)))
-(use-package forge
-  :after magit)
+  :bind (("C-x g" . magit-status)) )
+
+(define-key project-prefix-map "m" #'magit-project-status)
+(add-to-list 'project-switch-commands '(magit-project-status "Magit") t)
 
 ;;; eslint
 (require 'compile-eslint)
