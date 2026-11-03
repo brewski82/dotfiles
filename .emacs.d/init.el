@@ -543,12 +543,13 @@
 (require 'william-bruschi-javascript nil nil)
 
 ;;; eglot config
-(dolist (hook '(python-mode-hook rjsx-mode-hook typescript-mode-hook))
-  (add-hook hook (lambda ()
-                   (eglot-ensure)
-                   (define-key eglot-mode-map (kbd "M-.") 'xref-find-definitions)
-                   (define-key eglot-mode-map (kbd "C-.") 'xref-find-definitions)
-                   (define-key eglot-mode-map (kbd "C-,") 'xref-go-back))))
+(dolist (hook '(python-mode-hook rjsx-mode-hook typescript-mode-hook java-mode-hook))
+  (add-hook hook #'eglot-ensure))
+
+(with-eval-after-load 'eglot
+  (keymap-set eglot-mode-map "M-." #'xref-find-definitions)
+  (keymap-set eglot-mode-map "C-." #'xref-find-definitions)
+  (keymap-set eglot-mode-map "C-," #'xref-go-back))
 
 (require 'william-bruschi-custom)
 (require 'william-bruschi-ai-tools)
